@@ -47,6 +47,7 @@ create "type: bug"          "Something isn't working"               "d73a4a"
 create "type: feature"      "New functionality"                     "1d76db"
 create "type: docs"         "Documentation only"                    "999999"
 create "type: enhancement"  "Refinement of existing functionality"  "7057ff"
+create "type: refactor"     "Behavior-preserving restructuring"     "e4e669"
 
 # Remove the GitHub default labels that overlap with the type:- variants.
 # These deletions are also non-fatal — if they don't exist, gh prints a warning.
