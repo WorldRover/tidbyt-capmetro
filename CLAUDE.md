@@ -28,26 +28,23 @@ pixlet push --api-token <token> <device-id> capmetro.webp
 `CapMetro.star` is the entire app — one Starlark file with no imports beyond the Tidbyt standard library (`render`, `http`, `cache`, `encoding/base64`, `schema`).
 
 **Data flow in `main(config)`:**
-1. Read `route_id` from config (default: `803`).
-2. Check `cache` for previously fetched vehicle data using per-route keys (`capmetro_{route_id}_*`, TTL: 60s).
-3. On cache miss, fetch GTFS vehicle positions JSON from `CAPMETRO_GTFS_URL`, find the first vehicle whose `trip.routeId` matches the configured route.
-4. If the feed is unreachable or no matching vehicle is found, return a graceful no-service display instead of crashing.
-5. Resolve human-readable names/colors from the lookup dictionaries, then build and return a `render.Root` layout.
+1. Read `stop_1`/`stop_2`/`stop_3` from config (default: `stop_1 = "603"`, others empty).
+2. Check `cache` for previously fetched departures using a per-stop-set key (`capmetro_deps_<stop_ids>`, TTL: 60s).
+3. On cache miss, fetch GTFS trip updates JSON from `CAPMETRO_TRIP_UPDATES_URL`, call `find_departures()` to collect the 2 soonest arrivals across all configured stops.
+4. If the feed is unreachable or no departures are found, return a graceful no-service display instead of crashing.
+5. Render one `departure_row()` per result and return a `render.Root` with a two-row column layout.
 
 **Lookup dictionaries** (defined at the top of the file, before `main()`):
 - `route_names` — route ID → display name
 - `route_colors` — route ID → hex color string (blue `004A97` for local, gray `555555` for MetroRapid, red `E2231A` for express/rail)
 - `stops` — stop ID → intersection/station name
-- `statuses` — GTFS status code → display string
 
-**Display layout** (64×32 pixels, three rows — active vehicle):
-- Row 1: colored route number badge + scrolling route name marquee
-- Row 2: CapMetro icon + vehicle status text + ETA ("In X min" / "Due" / ">1 hr"), falling back to speed in MPH if no prediction available
-- Row 3: stop ID badge + scrolling stop name marquee
+**Display layout** (64×32 pixels, two 16-px departure rows):
+- Departure row top (8px): colored route badge + ETA text ("Due" / "In N min" / ">1 hr")
+- Departure row bottom (8px): scrolling stop name marquee (indented to align with ETA text)
 
-**No-service display** (shown when route has no active vehicle):
-- Row 1: colored route number badge + scrolling route name marquee
-- Row 2: CapMetro icon + "Not in service" or "Feed unavailable" message
+**No-service display** (shown when feed is unreachable or no departures found):
+- CapMetro icon + "Feed unavailable" or "No departures" message
 
 ## Versioning
 
@@ -65,9 +62,8 @@ Required labels: `ui`, `data`, `infra`, `P1`, `P2`, `P3`, `type: bug`, `type: fe
 
 ## Key constants
 
-- `CAPMETRO_GTFS_URL` — Texas.gov GTFS vehicle positions feed (`https://data.texas.gov/download/cuc7-ywmd/text%2Fplain`)
 - `CAPMETRO_TRIP_UPDATES_URL` — Texas.gov GTFS trip updates feed with arrival predictions (`https://data.texas.gov/download/mqtr-wwpy/text%2Fplain`)
-- `DEFAULT_ROUTE` — route shown when no config is provided (`803`, MetroRapid Burnet/S Lamar)
+- `DEFAULT_STOP` — stop shown when no config is provided (`603`, 31st Street Station NB)
 - Tidbyt device ID and API token are stored outside the repo (see `creds.txt`, which is gitignored)
 
 ## Key references
@@ -75,5 +71,5 @@ Required labels: `ui`, `data`, `infra`, `P1`, `P2`, `P3`, `type: bug`, `type: fe
 - Pixlet docs: https://github.com/tidbyt/pixlet/blob/main/docs/authoring_apps.md
 - Widget reference: https://github.com/tidbyt/pixlet/blob/main/docs/widgets.md
 - Font reference: https://github.com/tidbyt/pixlet/blob/main/docs/fonts.md
-- GTFS vehicle positions API: https://data.texas.gov/download/cuc7-ywmd/text%2Fplain
+- GTFS trip updates API: https://data.texas.gov/download/mqtr-wwpy/text%2Fplain
 - Sample responses are in `resources/vehiclepositions.json` and `resources/vehiclepositions-2.json`
