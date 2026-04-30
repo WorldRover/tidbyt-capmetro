@@ -19,4 +19,6 @@ jobs:
           sudo mv pixlet /usr/local/bin/
 
       - name: Check formatting
-        run: pixlet format --check CapMetro.star
+        run: |
+          pixlet format CapMetro.star
+          git diff --exit-code CapMetro.star
