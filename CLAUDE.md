@@ -2,6 +2,8 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
+**GitHub:** https://github.com/WorldRover/tidbyt-capmetro
+
 ## What This Is
 
 A [Tidbyt](https://tidbyt.com/) app written in [Starlark](https://github.com/google/starlark-go/blob/master/doc/spec.md) that displays real-time CapMetro (Austin, TX) transit data on a Tidbyt LED display. The single app file is `CapMetro.star`.
@@ -42,7 +44,26 @@ pixlet push --api-token <token> <device-id> capmetro.webp
 - Row 2: CapMetro icon + vehicle status text + speed in MPH
 - Row 3: stop ID badge + scrolling stop name marquee
 
-## Key References
+## Versioning
+
+This project uses [Semantic Versioning](https://semver.org/). Tag releases as `vMAJOR.MINOR.PATCH` directly on `main` after merging.
+
+**Cadence — buffer model:** batch small fixes into minor releases rather than shipping a patch for every commit. Cut a release when the `## [Unreleased]` section in CHANGELOG.md has accumulated meaningful changes, or immediately for any breaking change.
+
+## Branches and pull requests
+
+Branch names must follow `(feat|fix|refactor|chore|docs|test)/NNN-short-slug` where `NNN` is the issue number. PRs merge into `main`; no long-lived feature branches. Delete the branch after merge.
+
+## Labels
+
+Required labels: `ui`, `data`, `infra`, `P1`, `P2`, `P3`, `type: bug`, `type: feature`, `type: docs`, `type: enhancement`. The default GitHub labels (`bug`, `enhancement`, `documentation`) should be removed.
+
+## Key constants
+
+- `CAPMETRO_GTFS_URL` — Texas.gov GTFS vehicle positions feed (`https://data.texas.gov/download/cuc7-ywmd/text%2Fplain`)
+- Tidbyt device ID and API token are stored outside the repo (see `creds.txt`, which is gitignored)
+
+## Key references
 
 - Pixlet docs: https://github.com/tidbyt/pixlet/blob/main/docs/authoring_apps.md
 - Widget reference: https://github.com/tidbyt/pixlet/blob/main/docs/widgets.md

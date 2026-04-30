@@ -1,0 +1,24 @@
+{
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Bash(git commit *)",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash -c 'echo \"$CLAUDE_TOOL_INPUT\" | grep -qE \"git[[:space:]]+commit\" || exit 0; git diff --cached --name-only | grep -q \"^CHANGELOG\\.md$\" || { echo \"Stage CHANGELOG.md (update ## [Unreleased]) before committing.\" >&2; exit 1; }'"
+          }
+        ]
+      },
+      {
+        "matcher": "Bash(git push *)",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash -c 'BRANCH=$(git rev-parse --abbrev-ref HEAD); case \"$BRANCH\" in main|HEAD) exit 0;; esac; echo \"$BRANCH\" | grep -qE \"^(feat|fix|refactor|chore|docs|test)/[0-9]+-[a-z0-9-]+$\" || { echo \"Branch \\\"$BRANCH\\\" must match (feat|fix|refactor|chore|docs|test)/NNN-slug\" >&2; exit 1; }'"
+          }
+        ]
+      }
+    ]
+  }
+}
