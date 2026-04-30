@@ -7,20 +7,27 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- Redesigned as a **departures board**: shows the next 2 arrivals across up to 3 configured stops instead of tracking a single route's vehicle
+- Schema now accepts `stop_1`/`stop_2`/`stop_3` stop IDs instead of a `route_id`
+- Data source switched from GTFS vehicle positions to GTFS trip updates feed exclusively — ETA is always a real prediction, never a speed estimate
+- Display layout changed to two 16-px departure rows (route badge + ETA + scrolling stop name) filling the full 64×32 canvas
+- Cache key is now per stop-set (`capmetro_deps_<stop_ids>`) instead of per route
+
 ### Added
 
-- ETA display from GTFS trip updates feed (`mqtr-wwpy`): row 2 now shows "In X min" / "Due" / ">1 hr" instead of speed when a prediction is available; falls back to MPH when not
-- `get_eta_minutes()` — fetches trip updates, matches on `tripId` + `stopId`, returns minutes to arrival
-- `eta_text()` — formats ETA integer into display string
-- ETA cached per-route alongside speed/status/stop (60s TTL)
+- `find_departures(stop_ids, entities, now_unix)` — scans trip updates for any of the configured stops and returns the 2 soonest arrivals
+- `encode_deps()` / `decode_deps()` — compact string serialization for caching departure tuples
+- `dep_eta_text()` — formats an ETA integer into "Due" / "In N min" / ">1 hr"
+- `departure_row()` — renders one 16-px departure row (colored route badge, ETA, scrolling stop name)
 
-### Added
+### Removed
 
-- `schema()` function — users can now configure their route in the Tidbyt app
-- `main()` now accepts `config`; filters vehicles by the configured route ID (default: 803)
-- Per-route cache keys so multiple users watching different routes don't stomp each other
-- `no_service_display()` helper renders a graceful "Not in service" screen instead of crashing when no vehicle matches the route
-- Feed HTTP errors now return a "Feed unavailable" display instead of crashing
+- GTFS vehicle positions feed (`CAPMETRO_GTFS_URL`) — no longer used
+- `get_eta_minutes()`, `eta_text()` — replaced by `find_departures()` + `dep_eta_text()`
+- `statuses` lookup dict and speed/MPH display — departures board doesn't show vehicle status
+- `MS_TO_MPH`, `ETA_NONE`, `DEFAULT_ROUTE` constants
 
 ## [0.1.0] - 2026-04-30
 
