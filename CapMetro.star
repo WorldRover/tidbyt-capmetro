@@ -2571,6 +2571,8 @@ stops = {
     "6463": "2121 51st/Tilley",
 }
 
+MS_TO_MPH = 2.237
+
 # Definitions
 
 def main():
@@ -2578,31 +2580,32 @@ def main():
     speed_cached = cache.get("capmetro_speed")
     status_cached = cache.get("capmetro_status")
     stop_cached = cache.get("capmetro_stop")
-    if route_cached != None:
-        print("Hit! Displaying cached data.")
+    if route_cached != None and speed_cached != None and status_cached != None and stop_cached != None:
         route = route_cached
         speed = int(speed_cached)
         status = status_cached
         stop = stop_cached
     else:
-        print("Miss! Calling CapMetro API.")
         rep = http.get(CAPMETRO_GTFS_URL)
         if rep.status_code != 200:
             fail("CapMetro request failed with status %d", rep.status_code)
 
+        route = None
         for x in rep.json()["entity"]:
             if x["vehicle"].get("trip"):
-                print(x["id"] + ":" + x["vehicle"]["trip"]["routeId"])
                 route = x["vehicle"]["trip"]["routeId"]
-                speed = x["vehicle"]["position"]["speed"]
+                speed = int(x["vehicle"]["position"]["speed"] * MS_TO_MPH)
                 status = x["vehicle"]["currentStatus"]
                 stop = x["vehicle"]["stopId"]
                 break
 
-        cache.set("capmetro_route", str(int(route)), ttl_seconds = 1)
-        cache.set("capmetro_speed", str(int(speed)), ttl_seconds = 1)
-        cache.set("capmetro_status", str(status), ttl_seconds = 1)
-        cache.set("capmetro_stop", str(stop), ttl_seconds = 1)
+        if route == None:
+            fail("No active vehicle found in CapMetro feed")
+
+        cache.set("capmetro_route", route, ttl_seconds = 60)
+        cache.set("capmetro_speed", str(speed), ttl_seconds = 60)
+        cache.set("capmetro_status", status, ttl_seconds = 60)
+        cache.set("capmetro_stop", stop, ttl_seconds = 60)
 
     route_display = route_names.get(route, route_names["000"])
     route_color = route_colors.get(route, route_colors["000"])
@@ -2644,13 +2647,7 @@ def main():
                         render.Column(
                             children = [
                                 render.Text(content = status_display, font = "tom-thumb", height = 10, offset = 2),
-                                render.Row(
-                                    expanded = True,
-                                    main_align = "space_between",
-                                    children = [
-                                        render.Text("%d MPH" % speed, font = "tom-thumb"),
-                                    ],
-                                ),
+                                render.Text("%d MPH" % speed, font = "tom-thumb"),
                             ],
                         ),
                     ],
