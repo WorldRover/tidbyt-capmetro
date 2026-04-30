@@ -25,13 +25,14 @@ pixlet push --api-token <token> <device-id> capmetro.webp
 
 ## Architecture
 
-`CapMetro.star` is the entire app — one Starlark file with no imports beyond the Tidbyt standard library (`render`, `http`, `cache`, `encoding/base64`).
+`CapMetro.star` is the entire app — one Starlark file with no imports beyond the Tidbyt standard library (`render`, `http`, `cache`, `encoding/base64`, `schema`).
 
-**Data flow in `main()`:**
-1. Check `cache` for previously fetched vehicle data (TTL: 1 second).
-2. On cache miss, fetch GTFS vehicle positions JSON from `CAPMETRO_GTFS_URL` (`data.texas.gov`), extract the first vehicle entity that has a trip.
-3. Store route, speed, status, and stop in cache.
-4. Resolve human-readable names/colors from the lookup dictionaries, then build and return a `render.Root` layout.
+**Data flow in `main(config)`:**
+1. Read `route_id` from config (default: `803`).
+2. Check `cache` for previously fetched vehicle data using per-route keys (`capmetro_{route_id}_*`, TTL: 60s).
+3. On cache miss, fetch GTFS vehicle positions JSON from `CAPMETRO_GTFS_URL`, find the first vehicle whose `trip.routeId` matches the configured route.
+4. If the feed is unreachable or no matching vehicle is found, return a graceful no-service display instead of crashing.
+5. Resolve human-readable names/colors from the lookup dictionaries, then build and return a `render.Root` layout.
 
 **Lookup dictionaries** (defined at the top of the file, before `main()`):
 - `route_names` — route ID → display name
@@ -39,10 +40,14 @@ pixlet push --api-token <token> <device-id> capmetro.webp
 - `stops` — stop ID → intersection/station name
 - `statuses` — GTFS status code → display string
 
-**Display layout** (64×32 pixels, three rows):
+**Display layout** (64×32 pixels, three rows — active vehicle):**
 - Row 1: colored route number badge + scrolling route name marquee
 - Row 2: CapMetro icon + vehicle status text + speed in MPH
 - Row 3: stop ID badge + scrolling stop name marquee
+
+**No-service display** (shown when route has no active vehicle):
+- Row 1: colored route number badge + scrolling route name marquee
+- Row 2: CapMetro icon + "Not in service" or "Feed unavailable" message
 
 ## Versioning
 
@@ -61,6 +66,7 @@ Required labels: `ui`, `data`, `infra`, `P1`, `P2`, `P3`, `type: bug`, `type: fe
 ## Key constants
 
 - `CAPMETRO_GTFS_URL` — Texas.gov GTFS vehicle positions feed (`https://data.texas.gov/download/cuc7-ywmd/text%2Fplain`)
+- `DEFAULT_ROUTE` — route shown when no config is provided (`803`, MetroRapid Burnet/S Lamar)
 - Tidbyt device ID and API token are stored outside the repo (see `creds.txt`, which is gitignored)
 
 ## Key references
