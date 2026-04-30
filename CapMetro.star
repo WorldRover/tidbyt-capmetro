@@ -3,8 +3,10 @@ load("http.star", "http")
 load("encoding/base64.star", "base64")
 load("cache.star", "cache")
 load("schema.star", "schema")
+load("time.star", "time")
 
 CAPMETRO_GTFS_URL = "https://data.texas.gov/download/cuc7-ywmd/text%2Fplain"
+CAPMETRO_TRIP_UPDATES_URL = "https://data.texas.gov/download/mqtr-wwpy/text%2Fplain"
 DEFAULT_ROUTE = "803"
 
 CAPMETRO_ICON = base64.decode("""
@@ -2574,8 +2576,34 @@ stops = {
 }
 
 MS_TO_MPH = 2.237
+ETA_NONE = "-1"
 
 # Definitions
+
+def get_eta_minutes(trip_id, stop_id):
+    rep = http.get(CAPMETRO_TRIP_UPDATES_URL)
+    if rep.status_code != 200:
+        return -1
+    now_unix = time.now().unix
+    for entity in rep.json()["entity"]:
+        trip_update = entity.get("tripUpdate", {})
+        if trip_update.get("trip", {}).get("tripId") != trip_id:
+            continue
+        for stu in trip_update.get("stopTimeUpdate", []):
+            if stu.get("stopId") == stop_id:
+                arrival_time = stu.get("arrival", {}).get("time")
+                if arrival_time:
+                    return max(0, int((arrival_time - now_unix) / 60))
+    return -1
+
+def eta_text(eta):
+    if eta < 0:
+        return None
+    if eta == 0:
+        return "Due"
+    if eta >= 60:
+        return ">1 hr"
+    return "In %d min" % eta
 
 def no_service_display(route_id, message):
     route_color = route_colors.get(route_id, route_colors["000"])
@@ -2622,11 +2650,13 @@ def main(config):
     speed_cached = cache.get(cache_prefix + "speed")
     status_cached = cache.get(cache_prefix + "status")
     stop_cached = cache.get(cache_prefix + "stop")
+    eta_cached = cache.get(cache_prefix + "eta")
 
-    if speed_cached != None and status_cached != None and stop_cached != None:
+    if speed_cached != None and status_cached != None and stop_cached != None and eta_cached != None:
         speed = int(speed_cached)
         status = status_cached
         stop = stop_cached
+        eta = int(eta_cached)
     else:
         rep = http.get(CAPMETRO_GTFS_URL)
         if rep.status_code != 200:
@@ -2640,14 +2670,18 @@ def main(config):
                 speed = int(vehicle["position"]["speed"] * MS_TO_MPH)
                 status = vehicle.get("currentStatus", "NONE")
                 stop = vehicle.get("stopId", "0000")
+                trip_id = trip.get("tripId", "")
                 break
 
         if speed == None:
             return no_service_display(route_id, "Not in service")
 
+        eta = get_eta_minutes(trip_id, stop)
+
         cache.set(cache_prefix + "speed", str(speed), ttl_seconds = 60)
         cache.set(cache_prefix + "status", status, ttl_seconds = 60)
         cache.set(cache_prefix + "stop", stop, ttl_seconds = 60)
+        cache.set(cache_prefix + "eta", str(eta), ttl_seconds = 60)
 
     route_display = route_names.get(route_id, route_id)
     route_color = route_colors.get(route_id, route_colors["000"])
@@ -2657,6 +2691,8 @@ def main(config):
         stop_font = "tb-8"
     else:
         stop_font = "tom-thumb"
+
+    speed_or_eta = eta_text(eta) or "%d MPH" % speed
 
     return render.Root(
         max_age = 60,
@@ -2689,7 +2725,7 @@ def main(config):
                         render.Column(
                             children = [
                                 render.Text(content = status_display, font = "tom-thumb", height = 10, offset = 2),
-                                render.Text("%d MPH" % speed, font = "tom-thumb"),
+                                render.Text(speed_or_eta, font = "tom-thumb"),
                             ],
                         ),
                     ],

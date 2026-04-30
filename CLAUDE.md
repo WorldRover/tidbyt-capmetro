@@ -40,9 +40,9 @@ pixlet push --api-token <token> <device-id> capmetro.webp
 - `stops` — stop ID → intersection/station name
 - `statuses` — GTFS status code → display string
 
-**Display layout** (64×32 pixels, three rows — active vehicle):**
+**Display layout** (64×32 pixels, three rows — active vehicle):
 - Row 1: colored route number badge + scrolling route name marquee
-- Row 2: CapMetro icon + vehicle status text + speed in MPH
+- Row 2: CapMetro icon + vehicle status text + ETA ("In X min" / "Due" / ">1 hr"), falling back to speed in MPH if no prediction available
 - Row 3: stop ID badge + scrolling stop name marquee
 
 **No-service display** (shown when route has no active vehicle):
@@ -66,6 +66,7 @@ Required labels: `ui`, `data`, `infra`, `P1`, `P2`, `P3`, `type: bug`, `type: fe
 ## Key constants
 
 - `CAPMETRO_GTFS_URL` — Texas.gov GTFS vehicle positions feed (`https://data.texas.gov/download/cuc7-ywmd/text%2Fplain`)
+- `CAPMETRO_TRIP_UPDATES_URL` — Texas.gov GTFS trip updates feed with arrival predictions (`https://data.texas.gov/download/mqtr-wwpy/text%2Fplain`)
 - `DEFAULT_ROUTE` — route shown when no config is provided (`803`, MetroRapid Burnet/S Lamar)
 - Tidbyt device ID and API token are stored outside the repo (see `creds.txt`, which is gitignored)
 
