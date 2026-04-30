@@ -5,21 +5,14 @@ load("cache.star", "cache")
 load("schema.star", "schema")
 load("time.star", "time")
 
-CAPMETRO_GTFS_URL = "https://data.texas.gov/download/cuc7-ywmd/text%2Fplain"
 CAPMETRO_TRIP_UPDATES_URL = "https://data.texas.gov/download/mqtr-wwpy/text%2Fplain"
-DEFAULT_ROUTE = "803"
+DEFAULT_STOP = "603"
 
 CAPMETRO_ICON = base64.decode("""
 iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAAXNSR0IArs4c6QAAAERlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAA6ABAAMAAAABAAEAAKACAAQAAAABAAAAEKADAAQAAAABAAAAEAAAAAA0VXHyAAAAd0lEQVQ4EWM0CGj4z0ABYKJAL1grXgPOr68naD4jpV5gwWUFsu2GgY24lDFg9QKyZpBOdD6yaVgNQFZAiI1hAC7bcIlTPxBx2QTyCrbAxPACIT+jy1PsBQwXgLyA7g1sYjCXYBgAkkD3KzofphlEU98LyKYTwwYA03okBuVO8dsAAAAASUVORK5CYII=
 """)
 
 # Lookup
-
-statuses = {
-    "NONE": "Unknown",
-    "STOPPED_AT": "At Stop",
-    "IN_TRANSIT_TO": "In Transit",
-}
 
 route_names = {
     "000": "NONE",
@@ -2575,181 +2568,122 @@ stops = {
     "6463": "2121 51st/Tilley",
 }
 
-MS_TO_MPH = 2.237
-ETA_NONE = "-1"
-
 # Definitions
 
-def get_eta_minutes(trip_id, stop_id):
-    rep = http.get(CAPMETRO_TRIP_UPDATES_URL)
-    if rep.status_code != 200:
-        return -1
-    now_unix = time.now().unix
-    for entity in rep.json()["entity"]:
+def find_departures(stop_ids, entities, now_unix):
+    deps = []
+    for entity in entities:
         trip_update = entity.get("tripUpdate", {})
-        if trip_update.get("trip", {}).get("tripId") != trip_id:
+        route_id = trip_update.get("trip", {}).get("routeId", "")
+        if not route_id:
             continue
         for stu in trip_update.get("stopTimeUpdate", []):
-            if stu.get("stopId") == stop_id:
-                arrival_time = stu.get("arrival", {}).get("time")
-                if arrival_time:
-                    return max(0, int((arrival_time - now_unix) / 60))
-    return -1
+            sid = stu.get("stopId", "")
+            if sid not in stop_ids:
+                continue
+            arrival = stu.get("arrival", {}).get("time") or stu.get("departure", {}).get("time")
+            if not arrival:
+                continue
+            eta_min = int((arrival - now_unix) / 60)
+            if eta_min < 0:
+                continue
+            deps.append((eta_min, route_id, sid))
+    deps.sort(key = lambda d: d[0])
+    return deps[:2]
 
-def eta_text(eta):
-    if eta < 0:
-        return None
-    if eta == 0:
+def encode_deps(deps):
+    return "|".join(["%d:%s:%s" % (d[0], d[1], d[2]) for d in deps])
+
+def decode_deps(s):
+    if not s:
+        return []
+    deps = []
+    for part in s.split("|"):
+        pieces = part.split(":")
+        if len(pieces) == 3:
+            deps.append((int(pieces[0]), pieces[1], pieces[2]))
+    return deps
+
+def dep_eta_text(eta_min):
+    if eta_min == 0:
         return "Due"
-    if eta >= 60:
+    if eta_min >= 60:
         return ">1 hr"
-    return "In %d min" % eta
+    return "In %d min" % eta_min
 
-def no_service_display(route_id, message):
+def departure_row(route_id, stop_id, eta_min):
     route_color = route_colors.get(route_id, route_colors["000"])
-    route_display = route_names.get(route_id, route_id)
+    stop_display = stops.get(stop_id, stop_id)
+    return render.Column(
+        children = [
+            render.Row(
+                cross_align = "center",
+                children = [
+                    render.Box(
+                        child = render.Text(content = route_id, font = "tom-thumb"),
+                        width = 16,
+                        height = 8,
+                        color = "#" + route_color,
+                    ),
+                    render.Box(width = 1, height = 8),
+                    render.Text(content = dep_eta_text(eta_min), font = "tom-thumb"),
+                ],
+            ),
+            render.Marquee(
+                width = 64,
+                child = render.Row(
+                    children = [
+                        render.Box(width = 17, height = 8),
+                        render.Text(content = stop_display, font = "tom-thumb"),
+                    ],
+                ),
+            ),
+        ],
+    )
+
+def no_service_display(message):
     return render.Root(
         max_age = 60,
-        child = render.Column(
+        child = render.Row(
+            cross_align = "center",
             children = [
-                render.Row(
-                    cross_align = "center",
-                    children = [
-                        render.Box(
-                            child = render.Text(content = route_id),
-                            width = 16,
-                            height = 8,
-                            color = "#" + route_color,
-                        ),
-                        render.Marquee(
-                            width = 48,
-                            child = render.Row(
-                                children = [
-                                    render.Box(width = 1, height = 8),
-                                    render.Text(content = route_display),
-                                ],
-                            ),
-                        ),
-                    ],
-                ),
-                render.Row(
-                    children = [
-                        render.Image(src = CAPMETRO_ICON),
-                        render.Box(width = 1, height = 16),
-                        render.Text(content = message, font = "tom-thumb"),
-                    ],
-                ),
+                render.Image(src = CAPMETRO_ICON),
+                render.Box(width = 1, height = 16),
+                render.Text(content = message, font = "tom-thumb"),
             ],
         ),
     )
 
 def main(config):
-    route_id = config.str("route_id", DEFAULT_ROUTE)
-    cache_prefix = "capmetro_%s_" % route_id
+    stop_1 = config.str("stop_1", DEFAULT_STOP)
+    stop_2 = config.str("stop_2", "")
+    stop_3 = config.str("stop_3", "")
+    stop_ids = [s for s in [stop_1, stop_2, stop_3] if s]
 
-    speed_cached = cache.get(cache_prefix + "speed")
-    status_cached = cache.get(cache_prefix + "status")
-    stop_cached = cache.get(cache_prefix + "stop")
-    eta_cached = cache.get(cache_prefix + "eta")
+    cache_key = "capmetro_deps_" + "_".join(stop_ids)
+    cached = cache.get(cache_key)
 
-    if speed_cached != None and status_cached != None and stop_cached != None and eta_cached != None:
-        speed = int(speed_cached)
-        status = status_cached
-        stop = stop_cached
-        eta = int(eta_cached)
+    if cached != None:
+        deps = decode_deps(cached)
     else:
-        rep = http.get(CAPMETRO_GTFS_URL)
+        rep = http.get(CAPMETRO_TRIP_UPDATES_URL)
         if rep.status_code != 200:
-            return no_service_display(route_id, "Feed unavailable")
+            return no_service_display("Feed unavailable")
+        now_unix = time.now().unix
+        deps = find_departures(stop_ids, rep.json()["entity"], now_unix)
+        cache.set(cache_key, encode_deps(deps), ttl_seconds = 60)
 
-        speed = None
-        for x in rep.json()["entity"]:
-            vehicle = x.get("vehicle", {})
-            trip = vehicle.get("trip")
-            if trip and trip.get("routeId") == route_id:
-                speed = int(vehicle["position"]["speed"] * MS_TO_MPH)
-                status = vehicle.get("currentStatus", "NONE")
-                stop = vehicle.get("stopId", "0000")
-                trip_id = trip.get("tripId", "")
-                break
+    if not deps:
+        return no_service_display("No departures")
 
-        if speed == None:
-            return no_service_display(route_id, "Not in service")
-
-        eta = get_eta_minutes(trip_id, stop)
-
-        cache.set(cache_prefix + "speed", str(speed), ttl_seconds = 60)
-        cache.set(cache_prefix + "status", status, ttl_seconds = 60)
-        cache.set(cache_prefix + "stop", stop, ttl_seconds = 60)
-        cache.set(cache_prefix + "eta", str(eta), ttl_seconds = 60)
-
-    route_display = route_names.get(route_id, route_id)
-    route_color = route_colors.get(route_id, route_colors["000"])
-    status_display = statuses.get(status, statuses["NONE"])
-    stop_display = stops.get(stop, stops["0000"])
-    if len(stop) < 4:
-        stop_font = "tb-8"
-    else:
-        stop_font = "tom-thumb"
-
-    speed_or_eta = eta_text(eta) or "%d MPH" % speed
+    rows = [departure_row(d[1], d[2], d[0]) for d in deps]
+    if len(rows) == 1:
+        rows.append(render.Box(width = 64, height = 16))
 
     return render.Root(
         max_age = 60,
         child = render.Column(
-            children = [
-                render.Row(
-                    cross_align = "center",
-                    children = [
-                        render.Box(
-                            child = render.Text(content = route_id),
-                            width = 16,
-                            height = 8,
-                            color = "#" + route_color,
-                        ),
-                        render.Marquee(
-                            width = 48,
-                            child = render.Row(
-                                children = [
-                                    render.Box(width = 1, height = 8),
-                                    render.Text(content = route_display),
-                                ],
-                            ),
-                        ),
-                    ],
-                ),
-                render.Row(
-                    children = [
-                        render.Image(src = CAPMETRO_ICON),
-                        render.Box(width = 1, height = 16),
-                        render.Column(
-                            children = [
-                                render.Text(content = status_display, font = "tom-thumb", height = 10, offset = 2),
-                                render.Text(speed_or_eta, font = "tom-thumb"),
-                            ],
-                        ),
-                    ],
-                ),
-                render.Row(
-                    children = [
-                        render.Box(
-                            width = 16,
-                            height = 8,
-                            color = "#004A97",
-                            child = render.Text(content = stop, font = stop_font),
-                        ),
-                        render.Marquee(
-                            width = 48,
-                            child = render.Row(
-                                children = [
-                                    render.Box(width = 1, height = 8),
-                                    render.Text(content = stop_display),
-                                ],
-                            ),
-                        ),
-                    ],
-                ),
-            ],
+            children = rows,
         ),
     )
 
@@ -2758,11 +2692,25 @@ def schema():
         version = "1",
         fields = [
             schema.Text(
-                id = "route_id",
-                name = "Route",
-                desc = "CapMetro route number to display (e.g. 803, 550, 1)",
+                id = "stop_1",
+                name = "Stop 1",
+                desc = "CapMetro stop ID to monitor (e.g. 603 for 31st Street Station NB)",
                 icon = "bus",
-                default = DEFAULT_ROUTE,
+                default = DEFAULT_STOP,
+            ),
+            schema.Text(
+                id = "stop_2",
+                name = "Stop 2 (optional)",
+                desc = "Second stop ID to monitor",
+                icon = "bus",
+                default = "",
+            ),
+            schema.Text(
+                id = "stop_3",
+                name = "Stop 3 (optional)",
+                desc = "Third stop ID to monitor",
+                icon = "bus",
+                default = "",
             ),
         ],
     )
