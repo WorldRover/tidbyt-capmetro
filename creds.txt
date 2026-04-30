@@ -1,0 +1,41 @@
+Device ID
+winsomely-secure-enjoyed-dodo-6cb
+
+Key
+eyJhbGciOiJFUzI1NiIsImtpZCI6IjY1YzFhMmUzNzJjZjljMTQ1MTQyNzk5ODZhMzYyNmQ1Y2QzNTI0N2IiLCJ0eXAiOiJKV1QifQ.eyJhdWQiOiJodHRwczovL2FwaS50aWRieXQuY29tIiwiZXhwIjoxNjc5ODYxMzQwLCJpYXQiOjE2NDgzMjUzNDAsImlzcyI6Imh0dHBzOi8vYXBpLnRpZGJ5dC5jb20iLCJzdWIiOiI1dE5tTjNIZHpMT2xBSjhSRlNON3hBdzY5ZEkzIiwic2NvcGUiOiJkZXZpY2UiLCJkZXZpY2UiOiJ3aW5zb21lbHktc2VjdXJlLWVuam95ZWQtZG9kby02Y2IifQ.oM69ILAB90L8a-56lZCHJEJBnZCSBxbffPoKYl2SIDvpDvsdaORYQP6PpNn3NrPauLaNaRgKxMyXiTJAqNRX4Q
+
+pixlet push --api-token eyJhbGciOiJFUzI1NiIsImtpZCI6IjY1YzFhMmUzNzJjZjljMTQ1MTQyNzk5ODZhMzYyNmQ1Y2QzNTI0N2IiLCJ0eXAiOiJKV1QifQ.eyJhdWQiOiJodHRwczovL2FwaS50aWRieXQuY29tIiwiZXhwIjoxNjc5ODYxMzQwLCJpYXQiOjE2NDgzMjUzNDAsImlzcyI6Imh0dHBzOi8vYXBpLnRpZGJ5dC5jb20iLCJzdWIiOiI1dE5tTjNIZHpMT2xBSjhSRlNON3hBdzY5ZEkzIiwic2NvcGUiOiJkZXZpY2UiLCJkZXZpY2UiOiJ3aW5zb21lbHktc2VjdXJlLWVuam95ZWQtZG9kby02Y2IifQ.oM69ILAB90L8a-56lZCHJEJBnZCSBxbffPoKYl2SIDvpDvsdaORYQP6PpNn3NrPauLaNaRgKxMyXiTJAqNRX4Q winsomely-secure-enjoyed-dodo-6cb capmetro.webp
+
+
+HUBOT_CAPMETRO_BUSES='{ "803N": 5865, "1N": 1042 }'
+
+
+https://www.capmetro.org/planner/s_nextbus2.asp?stopid=5865&route=803&dir=N&opt=2
+
+
+https://data.texas.gov/download/mqtr-wwpy/text%2Fplain
+
+https://data.texas.gov/download/cuc7-ywmd/text%2Fplain
+
+
+ROUTES
+^([0-9]+),[0-9]+,[0-9]+,([^,]+),,([0-9]),([0-9A-F]+),.+
+\t"$1": "$4",
+
+STOPS
+
+https://github.com/tidbyt/pixlet
+https://github.com/tidbyt/pixlet/blob/main/docs/tutorial.md
+https://www.pixilart.com/draw?ref=home-page
+https://github.com/tidbyt/pixlet/blob/main/docs/authoring_apps.md
+https://github.com/tidbyt/pixlet/blob/main/docs/widgets.md
+https://discuss.tidbyt.com
+https://tidbyt.com/
+https://github.com/google/starlark-go/blob/master/doc/spec.md#built-in-functions
+https://github.com/tidbyt/pixlet/blob/main/docs/fonts.md
+http://localhost:8080
+https://www.capmetro.org/ourservices/busroutes
+https://www.capmetro.org/schedmap/?svc=0&f1=214
+https://data.texas.gov/Transportation/CapMetro-Trip-Updates-JSON-File/mqtr-wwpy
+https://base64.guru/converter/encode/image
+https://regexr.com
