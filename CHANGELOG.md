@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- `schema()` function — users can now configure their route in the Tidbyt app
+- `main()` now accepts `config`; filters vehicles by the configured route ID (default: 803)
+- Per-route cache keys so multiple users watching different routes don't stomp each other
+- `no_service_display()` helper renders a graceful "Not in service" screen instead of crashing when no vehicle matches the route
+- Feed HTTP errors now return a "Feed unavailable" display instead of crashing
+
 ## [0.1.0] - 2026-04-30
 
 ### Fixed
