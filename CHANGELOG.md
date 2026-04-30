@@ -9,6 +9,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- ETA display from GTFS trip updates feed (`mqtr-wwpy`): row 2 now shows "In X min" / "Due" / ">1 hr" instead of speed when a prediction is available; falls back to MPH when not
+- `get_eta_minutes()` — fetches trip updates, matches on `tripId` + `stopId`, returns minutes to arrival
+- `eta_text()` — formats ETA integer into display string
+- ETA cached per-route alongside speed/status/stop (60s TTL)
+
+### Added
+
 - `schema()` function — users can now configure their route in the Tidbyt app
 - `main()` now accepts `config`; filters vehicles by the configured route ID (default: 803)
 - Per-route cache keys so multiple users watching different routes don't stomp each other
