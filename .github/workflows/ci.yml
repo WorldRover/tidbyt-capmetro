@@ -1,0 +1,22 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  render:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install pixlet
+        run: |
+          PIXLET_VERSION=$(curl -s https://api.github.com/repos/tidbyt/pixlet/releases/latest | grep '"tag_name"' | cut -d'"' -f4)
+          curl -fsSL "https://github.com/tidbyt/pixlet/releases/download/${PIXLET_VERSION}/pixlet_linux_amd64.tar.gz" -o pixlet.tar.gz
+          tar -xzf pixlet.tar.gz pixlet
+          sudo mv pixlet /usr/local/bin/
+
+      - name: Render app
+        run: pixlet render CapMetro.star
