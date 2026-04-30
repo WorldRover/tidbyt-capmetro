@@ -2,8 +2,10 @@ load("render.star", "render")
 load("http.star", "http")
 load("encoding/base64.star", "base64")
 load("cache.star", "cache")
+load("schema.star", "schema")
 
 CAPMETRO_GTFS_URL = "https://data.texas.gov/download/cuc7-ywmd/text%2Fplain"
+DEFAULT_ROUTE = "803"
 
 CAPMETRO_ICON = base64.decode("""
 iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAAXNSR0IArs4c6QAAAERlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAA6ABAAMAAAABAAEAAKACAAQAAAABAAAAEKADAAQAAAABAAAAEAAAAAA0VXHyAAAAd0lEQVQ4EWM0CGj4z0ABYKJAL1grXgPOr68naD4jpV5gwWUFsu2GgY24lDFg9QKyZpBOdD6yaVgNQFZAiI1hAC7bcIlTPxBx2QTyCrbAxPACIT+jy1PsBQwXgLyA7g1sYjCXYBgAkkD3KzofphlEU98LyKYTwwYA03okBuVO8dsAAAAASUVORK5CYII=
@@ -2575,40 +2577,80 @@ MS_TO_MPH = 2.237
 
 # Definitions
 
-def main():
-    route_cached = cache.get("capmetro_route")
-    speed_cached = cache.get("capmetro_speed")
-    status_cached = cache.get("capmetro_status")
-    stop_cached = cache.get("capmetro_stop")
-    if route_cached != None and speed_cached != None and status_cached != None and stop_cached != None:
-        route = route_cached
+def no_service_display(route_id, message):
+    route_color = route_colors.get(route_id, route_colors["000"])
+    route_display = route_names.get(route_id, route_id)
+    return render.Root(
+        max_age = 60,
+        child = render.Column(
+            children = [
+                render.Row(
+                    cross_align = "center",
+                    children = [
+                        render.Box(
+                            child = render.Text(content = route_id),
+                            width = 16,
+                            height = 8,
+                            color = "#" + route_color,
+                        ),
+                        render.Marquee(
+                            width = 48,
+                            child = render.Row(
+                                children = [
+                                    render.Box(width = 1, height = 8),
+                                    render.Text(content = route_display),
+                                ],
+                            ),
+                        ),
+                    ],
+                ),
+                render.Row(
+                    children = [
+                        render.Image(src = CAPMETRO_ICON),
+                        render.Box(width = 1, height = 16),
+                        render.Text(content = message, font = "tom-thumb"),
+                    ],
+                ),
+            ],
+        ),
+    )
+
+def main(config):
+    route_id = config.str("route_id", DEFAULT_ROUTE)
+    cache_prefix = "capmetro_%s_" % route_id
+
+    speed_cached = cache.get(cache_prefix + "speed")
+    status_cached = cache.get(cache_prefix + "status")
+    stop_cached = cache.get(cache_prefix + "stop")
+
+    if speed_cached != None and status_cached != None and stop_cached != None:
         speed = int(speed_cached)
         status = status_cached
         stop = stop_cached
     else:
         rep = http.get(CAPMETRO_GTFS_URL)
         if rep.status_code != 200:
-            fail("CapMetro request failed with status %d", rep.status_code)
+            return no_service_display(route_id, "Feed unavailable")
 
-        route = None
+        speed = None
         for x in rep.json()["entity"]:
-            if x["vehicle"].get("trip"):
-                route = x["vehicle"]["trip"]["routeId"]
-                speed = int(x["vehicle"]["position"]["speed"] * MS_TO_MPH)
-                status = x["vehicle"]["currentStatus"]
-                stop = x["vehicle"]["stopId"]
+            vehicle = x.get("vehicle", {})
+            trip = vehicle.get("trip")
+            if trip and trip.get("routeId") == route_id:
+                speed = int(vehicle["position"]["speed"] * MS_TO_MPH)
+                status = vehicle.get("currentStatus", "NONE")
+                stop = vehicle.get("stopId", "0000")
                 break
 
-        if route == None:
-            fail("No active vehicle found in CapMetro feed")
+        if speed == None:
+            return no_service_display(route_id, "Not in service")
 
-        cache.set("capmetro_route", route, ttl_seconds = 60)
-        cache.set("capmetro_speed", str(speed), ttl_seconds = 60)
-        cache.set("capmetro_status", status, ttl_seconds = 60)
-        cache.set("capmetro_stop", stop, ttl_seconds = 60)
+        cache.set(cache_prefix + "speed", str(speed), ttl_seconds = 60)
+        cache.set(cache_prefix + "status", status, ttl_seconds = 60)
+        cache.set(cache_prefix + "stop", stop, ttl_seconds = 60)
 
-    route_display = route_names.get(route, route_names["000"])
-    route_color = route_colors.get(route, route_colors["000"])
+    route_display = route_names.get(route_id, route_id)
+    route_color = route_colors.get(route_id, route_colors["000"])
     status_display = statuses.get(status, statuses["NONE"])
     stop_display = stops.get(stop, stops["0000"])
     if len(stop) < 4:
@@ -2624,7 +2666,7 @@ def main():
                     cross_align = "center",
                     children = [
                         render.Box(
-                            child = render.Text(content = route),
+                            child = render.Text(content = route_id),
                             width = 16,
                             height = 8,
                             color = "#" + route_color,
@@ -2673,4 +2715,18 @@ def main():
                 ),
             ],
         ),
+    )
+
+def schema():
+    return schema.Schema(
+        version = "1",
+        fields = [
+            schema.Text(
+                id = "route_id",
+                name = "Route",
+                desc = "CapMetro route number to display (e.g. 803, 550, 1)",
+                icon = "bus",
+                default = DEFAULT_ROUTE,
+            ),
+        ],
     )
