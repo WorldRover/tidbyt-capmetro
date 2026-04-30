@@ -18,5 +18,5 @@ jobs:
           tar -xzf pixlet.tar.gz pixlet
           sudo mv pixlet /usr/local/bin/
 
-      - name: Render app
-        run: pixlet render CapMetro.star
+      - name: Check formatting
+        run: pixlet format --check CapMetro.star
