@@ -2,7 +2,7 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
-**GitHub:** https://github.com/WorldRover/tidbyt-capmetro
+**GitHub:** [WorldRover/tidbyt-capmetro](https://github.com/WorldRover/tidbyt-capmetro)
 
 ## What This Is
 
@@ -28,6 +28,7 @@ pixlet push --api-token <token> <device-id> capmetro.webp
 `CapMetro.star` is the entire app — one Starlark file with no imports beyond the Tidbyt standard library (`render`, `http`, `cache`, `encoding/base64`, `schema`).
 
 **Data flow in `main(config)`:**
+
 1. Read `stop_1`/`stop_2`/`stop_3` from config (default: `stop_1 = "603"`, others empty).
 2. Check `cache` for previously fetched departures using a per-stop-set key (`capmetro_deps_<stop_ids>`, TTL: 60s).
 3. On cache miss, fetch GTFS trip updates JSON from `CAPMETRO_TRIP_UPDATES_URL`, call `find_departures()` to collect the 2 soonest arrivals across all configured stops.
@@ -35,15 +36,18 @@ pixlet push --api-token <token> <device-id> capmetro.webp
 5. Render one `departure_row()` per result and return a `render.Root` with a two-row column layout.
 
 **Lookup dictionaries** (defined at the top of the file, before `main()`):
+
 - `route_names` — route ID → display name
 - `route_colors` — route ID → hex color string (blue `004A97` for local, gray `555555` for MetroRapid, red `E2231A` for express/rail)
 - `stops` — stop ID → intersection/station name
 
 **Display layout** (64×32 pixels, two 16-px departure rows):
+
 - Departure row top (8px): colored route badge + ETA text ("Due" / "In N min" / ">1 hr")
 - Departure row bottom (8px): scrolling stop name marquee (indented to align with ETA text)
 
 **No-service display** (shown when feed is unreachable or no departures found):
+
 - CapMetro icon + "Feed unavailable" or "No departures" message
 
 ## Versioning
@@ -68,8 +72,8 @@ Required labels: `ui`, `data`, `infra`, `P1`, `P2`, `P3`, `type: bug`, `type: fe
 
 ## Key references
 
-- Pixlet docs: https://github.com/tidbyt/pixlet/blob/main/docs/authoring_apps.md
-- Widget reference: https://github.com/tidbyt/pixlet/blob/main/docs/widgets.md
-- Font reference: https://github.com/tidbyt/pixlet/blob/main/docs/fonts.md
-- GTFS trip updates API: https://data.texas.gov/download/mqtr-wwpy/text%2Fplain
+- Pixlet docs: [authoring_apps.md](https://github.com/tidbyt/pixlet/blob/main/docs/authoring_apps.md)
+- Widget reference: [widgets.md](https://github.com/tidbyt/pixlet/blob/main/docs/widgets.md)
+- Font reference: [fonts.md](https://github.com/tidbyt/pixlet/blob/main/docs/fonts.md)
+- GTFS trip updates API: [data.texas.gov](https://data.texas.gov/download/mqtr-wwpy/text%2Fplain)
 - Sample responses are in `resources/vehiclepositions.json` and `resources/vehiclepositions-2.json`
