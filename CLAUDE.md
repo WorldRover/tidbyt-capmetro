@@ -60,6 +60,8 @@ This project uses [Semantic Versioning](https://semver.org/). Tag releases as `v
 
 Branch names must follow `(feat|fix|refactor|chore|docs|test)/NNN-short-slug` where `NNN` is the issue number. PRs merge into `main`; no long-lived feature branches. Delete the branch after merge.
 
+**PR labels:** every PR must have at least one label from the canonical scheme before merge — this is what drives `gh release create --generate-notes` grouping via `.github/release.yml`. Labeling the tracking issue is not enough; the PR itself needs the label.
+
 ## Labels
 
 Required labels: `ui`, `data`, `infra`, `P1`, `P2`, `P3`, `type: bug`, `type: feature`, `type: docs`, `type: enhancement`. The default GitHub labels (`bug`, `enhancement`, `documentation`) should be removed.
