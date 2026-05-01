@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.2.0] - 2026-05-01
+
 ### Changed
 
 - Redesigned as a **departures board**: shows the next 2 arrivals across up to 3 configured stops instead of tracking a single route's vehicle

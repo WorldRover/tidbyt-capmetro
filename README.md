@@ -1,10 +1,16 @@
 # CapMetro Tidbyt App
 
-Displays real-time Capital Metro (Austin, TX) bus position data on a [Tidbyt](https://tidbyt.com/) device.
+Displays real-time Capital Metro (Austin, TX) departure predictions on a [Tidbyt](https://tidbyt.com/) device.
 
 ![CapMetro app preview](CapMetro.webp)
 
-Shows the current route name, vehicle status (In Transit / At Stop), speed in MPH, and the next stop — all pulled live from the CapMetro GTFS vehicle positions feed.
+Shows the next 2 bus or rail arrivals across up to 3 configured stops — pulled live from the CapMetro GTFS-RT trip updates feed. Each row shows a color-coded route badge, arrival ETA ("Due" / "In N min" / ">1 hr"), and a scrolling stop name.
+
+## Configuration
+
+In the Tidbyt app, set **Stop 1** (required), **Stop 2**, and **Stop 3** (optional) to the numeric CapMetro stop IDs you want to monitor. For example, stop `603` is 31st Street Station northbound.
+
+Find your stop ID on [CapMetro's trip planner](https://capmetro.org) or in the [GTFS static feed](https://data.texas.gov/dataset/CapMetro-GTFS/eiei-9rpf).
 
 ## Usage
 
