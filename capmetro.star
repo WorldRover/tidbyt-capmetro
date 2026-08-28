@@ -8,6 +8,10 @@ load("time.star", "time")
 CAPMETRO_TRIP_UPDATES_URL = "https://data.texas.gov/download/mqtr-wwpy/text%2Fplain"
 DEFAULT_STOP = "603"
 
+# 64px display: a 16px route badge column beside the ETA / stop-name column.
+BADGE_WIDTH = 16
+TEXT_WIDTH = 48
+
 CAPMETRO_ICON = base64.decode("""
 iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAAXNSR0IArs4c6QAAAERlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAA6ABAAMAAAABAAEAAKACAAQAAAABAAAAEKADAAQAAAABAAAAEAAAAAA0VXHyAAAAd0lEQVQ4EWM0CGj4z0ABYKJAL1grXgPOr68naD4jpV5gwWUFsu2GgY24lDFg9QKyZpBOdD6yaVgNQFZAiI1hAC7bcIlTPxBx2QTyCrbAxPACIT+jy1PsBQwXgLyA7g1sYjCXYBgAkkD3KzofphlEU98LyKYTwwYA03okBuVO8dsAAAAASUVORK5CYII=
 """)
@@ -2536,35 +2540,37 @@ def dep_eta_text(eta_min):
         return ">1 hr"
     return "In %d min" % eta_min
 
-def departure_row(route_id, stop_id, eta_min):
-    route_color = route_colors.get(route_id, route_colors["000"])
-    stop_display = stops.get(stop_id, stop_id)
-    return render.Column(
-        children = [
-            render.Row(
-                cross_align = "center",
-                children = [
-                    render.Box(
-                        child = render.Text(content = route_id, font = "tom-thumb"),
-                        width = 16,
-                        height = 8,
-                        color = "#" + route_color,
-                    ),
-                    render.Box(width = 1, height = 8),
-                    render.Text(content = dep_eta_text(eta_min), font = "tom-thumb"),
-                ],
-            ),
-            render.Marquee(
-                width = 64,
-                child = render.Row(
-                    children = [
-                        render.Box(width = 17, height = 8),
-                        render.Text(content = stop_display, font = "tom-thumb"),
-                    ],
-                ),
-            ),
-        ],
+def route_badge(route_id):
+    """A 16x16 color chip spanning both of a departure's text lines."""
+    return render.Box(
+        child = render.Text(content = route_id, font = "tom-thumb"),
+        width = 16,
+        height = 16,
+        color = "#" + route_colors.get(route_id, route_colors["000"]),
     )
+
+def departure_lines(stop_id, eta_min):
+    """The two 8px text lines that sit beside a route badge."""
+    stop_display = stops.get(stop_id, stop_id)
+    return [
+        render.Row(
+            cross_align = "center",
+            children = [
+                render.Box(width = 1, height = 8),
+                render.Text(content = dep_eta_text(eta_min), font = "tom-thumb"),
+            ],
+        ),
+        render.Row(
+            cross_align = "center",
+            children = [
+                render.Box(width = 1, height = 8),
+                render.Marquee(
+                    width = TEXT_WIDTH - 1,
+                    child = render.Text(content = stop_display, font = "tom-thumb"),
+                ),
+            ],
+        ),
+    ]
 
 def no_service_display(message):
     return render.Root(
@@ -2612,14 +2618,25 @@ def main(config):
     if not deps:
         return no_service_display("No departures")
 
-    rows = [departure_row(d[1], d[2], int((d[0] - now_unix) / 60)) for d in deps]
-    if len(rows) == 1:
-        rows.append(render.Box(width = 64, height = 16))
+    badges = []
+    lines = []
+    for d in deps:
+        badges.append(route_badge(d[1]))
+        lines.extend(departure_lines(d[2], int((d[0] - now_unix) / 60)))
+
+    # Pad a single departure so the badge column and the text column stay the
+    # same height and the row does not stretch to fill the display.
+    if len(deps) == 1:
+        badges.append(render.Box(width = BADGE_WIDTH, height = 16))
+        lines.append(render.Box(width = TEXT_WIDTH, height = 16))
 
     return render.Root(
         max_age = 60,
-        child = render.Column(
-            children = rows,
+        child = render.Row(
+            children = [
+                render.Column(children = badges),
+                render.Column(children = lines),
+            ],
         ),
     )
 
