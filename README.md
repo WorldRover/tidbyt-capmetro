@@ -32,6 +32,16 @@ pixlet render capmetro.star -o /tmp/capmetro.webp
 pixlet push --api-token <token> <device-id> /tmp/capmetro.webp
 ```
 
+### Credentials
+
+Copy `.env.example` to `.env` and fill in your Tidbyt API token and device ID — both come from the Tidbyt mobile app under **Settings → Developer**. `.env` is gitignored; never commit it.
+
+```bash
+cp .env.example .env
+set -a && . ./.env && set +a
+pixlet push --api-token "$TIDBYT_API_TOKEN" "$TIDBYT_DEVICE_ID" /tmp/capmetro.webp
+```
+
 ## Disclaimer
 
 This is an unofficial, independently built app. It is **not affiliated with,

@@ -83,7 +83,7 @@ Required labels: `ui`, `data`, `infra`, `P1`, `P2`, `P3`, `type: bug`, `type: fe
 - `BADGE_W` (16) / `ETA_W` (12) / `SPACE_W` (4) — column widths for the chip, the right-aligned compact ETA, and the gap between the stop name and that ETA
 - `FALLBACK_ROUTE_COLOR` (`000000`) — chip color for a route the feed reports but `route_colors` does not know
 - `DOME` — base64 CapMetro dome icon, drawn in the no-service displays and above the route number in `dome_bar()`
-- Tidbyt device ID and API token live in `creds.txt`, which is gitignored and must never be committed
+- Tidbyt device ID and API token live in `.env` (`TIDBYT_API_TOKEN`, `TIDBYT_DEVICE_ID`), which is gitignored and must never be committed. `.env.example` is the checked-in template.
 
 ## Key references
 
