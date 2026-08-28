@@ -10,7 +10,7 @@ Shows the next bus or rail arrivals across up to four configured stops — pulle
 
 ## Getting started
 
-In the Tidbyt app, set **Stop 1** through **Stop 4** to the numeric CapMetro stop IDs you want to monitor. All four are optional — stop `603` (31st Street Station northbound) is used if you leave Stop 1 blank.
+In the Tidbyt app, set **Stop 1** through **Stop 4** to the numeric CapMetro stop IDs you want to monitor. All four are optional — stop `603`, 31st Street Rapid Station (NB), is used if you leave Stop 1 blank.
 
 **Departures shown** picks how many arrivals appear at once, 1 to 4. The stops act as one pool: the app collects every upcoming departure across them and shows that many of the soonest, so setting four stops and two departures is a perfectly normal way to use it. The layout adapts to how many departures were actually found, so a quiet stop never leaves blank rows.
 
@@ -24,20 +24,25 @@ Requires the [pixlet](https://github.com/tidbyt/pixlet) CLI.
 # Preview locally
 pixlet serve capmetro.star
 
-# Render to image
-pixlet render capmetro.star
+# Render to an image. Note the default output name is capmetro.webp,
+# which is the README preview above - write elsewhere to avoid clobbering it.
+pixlet render capmetro.star -o /tmp/capmetro.webp
 
 # Push to device
-pixlet push --api-token <token> <device-id> capmetro.webp
+pixlet push --api-token <token> <device-id> /tmp/capmetro.webp
 ```
 
 ## Disclaimer
 
 This is an unofficial, independently built app. It is **not affiliated with,
-endorsed by, or supported by** the Capital Metropolitan Transportation Authority
-(CapMetro). "CapMetro" and the CapMetro logo are trademarks of their respective
-owner, used here only to identify the transit system whose public data the app
-displays.
+endorsed by, or supported by** either the Capital Metropolitan Transportation
+Authority (CapMetro) or Tidbyt.
+
+"CapMetro" and the CapMetro logo are trademarks of their respective owner, used
+here only to identify the transit system whose public data the app displays.
+"Tidbyt" and "pixlet" are trademarks of their respective owner, used here only
+to identify the hardware the app runs on and the tool used to build it. Neither
+organization has reviewed, approved, or endorsed this project.
 
 Arrival times come from CapMetro's public GTFS-Realtime feed and are
 **predictions, not guarantees**. The feed may be delayed, incomplete, or

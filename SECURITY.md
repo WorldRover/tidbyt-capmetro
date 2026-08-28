@@ -8,7 +8,10 @@ Expect an acknowledgement within 48 hours and a resolution or mitigation timelin
 
 ## Scope
 
-This project is a Tidbyt display app. The attack surface is limited to:
+This project is an unofficial, independently built display app for Tidbyt
+hardware, not affiliated with or supported by Tidbyt or CapMetro. Reports
+about this repository should come here, not to either organisation. The
+attack surface is limited to:
 
 - The CapMetro GTFS API response (`data.texas.gov`) — malformed or malicious payloads processed by `capmetro.star`
 - The Tidbyt API token and device ID stored outside this repository — if leaked, an attacker could push arbitrary images to the display
