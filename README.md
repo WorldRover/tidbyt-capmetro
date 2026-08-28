@@ -6,11 +6,13 @@ Displays real-time Capital Metro (Austin, TX) departure predictions on a [Tidbyt
 
 ![CapMetro app preview](capmetro.webp)
 
-Shows the next 2 bus or rail arrivals across up to 3 configured stops — pulled live from the CapMetro GTFS-RT trip updates feed. Each row shows a color-coded route badge, arrival ETA ("Due" / "In N min" / ">1 hr"), and a scrolling stop name.
+Shows the next bus or rail arrivals across up to four configured stops — pulled live from the CapMetro GTFS-RT trip updates feed. Choose how many departures to show (1–4); each one gets a color-coded route badge, an arrival ETA ("Due" / "In 8 min" / ">1 hr"), and its stop name.
 
 ## Getting started
 
-In the Tidbyt app, set **Stop 1** (required), **Stop 2**, and **Stop 3** (optional) to the numeric CapMetro stop IDs you want to monitor. For example, stop `603` is 31st Street Station northbound.
+In the Tidbyt app, set **Stop 1** through **Stop 4** to the numeric CapMetro stop IDs you want to monitor. All four are optional — stop `603` (31st Street Station northbound) is used if you leave Stop 1 blank.
+
+**Departures shown** picks how many arrivals appear at once, 1 to 4. The stops act as one pool: the app collects every upcoming departure across them and shows that many of the soonest, so setting four stops and two departures is a perfectly normal way to use it. The layout adapts to how many departures were actually found, so a quiet stop never leaves blank rows.
 
 Find your stop ID on [CapMetro's trip planner](https://www.capmetro.org/planner) — it appears in the stop URL and on the printed sign at the stop — or in the `stops.txt` file of the [GTFS static feed](https://data.texas.gov/dataset/CapMetro-GTFS/eiei-9rpf).
 

@@ -13,6 +13,16 @@ DEFAULT_STOP = "603"
 # deliberate "we do not know this route" rather than a guessed colour.
 FALLBACK_ROUTE_COLOR = "000000"
 
+CAPMETRO_BLUE = "004A97"
+DOME = base64.decode("""
+iVBORw0KGgoAAAANSUhEUgAAAAcAAAAMCAYAAACulacQAAAAOElEQVR4nGNgQAL/////z0AsYMSm
+i5GRESzOhM04GB8sidNYkhxBtE68dhJnLMxvIAC3CpedIHEAeqYn6wBzQaQAAAAASUVORK5CYII=
+""")
+
+BADGE_W = 16
+ETA_W = 12
+SPACE_W = 4
+
 # 64px display: a 16px route badge column beside the ETA / stop-name column.
 BADGE_WIDTH = 16
 TEXT_WIDTH = 48
@@ -2450,7 +2460,7 @@ stops = {
 
 # Definitions
 
-def find_departures(stop_ids, entities, now_unix):
+def find_departures(stop_ids, entities, now_unix, limit):
     deps = []
     for entity in entities:
         trip_update = entity.get("tripUpdate", {})
@@ -2470,7 +2480,7 @@ def find_departures(stop_ids, entities, now_unix):
             if arrival_unix < now_unix:
                 continue
             deps.append((arrival_unix, route_id, sid))
-    return sorted(deps, key = lambda d: d[0])[:2]
+    return sorted(deps, key = lambda d: d[0])[:limit]
 
 def encode_deps(deps):
     return "|".join(["%d:%s:%s" % (d[0], d[1], d[2]) for d in deps])
@@ -2492,63 +2502,99 @@ def dep_eta_text(eta_min):
         return ">1 hr"
     return "In %d min" % eta_min
 
-def route_badge(route_id):
-    """A 16x16 color chip spanning both of a departure's text lines."""
+def eta_short(eta_min):
+    if eta_min == 0:
+        return "Due"
+    if eta_min >= 60:
+        return ">1h"
+    return "%dm" % eta_min
+
+def stop_label(stop_id):
+    return stops.get(stop_id, "Stop " + stop_id)
+
+def chip(route_id, height):
     return render.Box(
         child = render.Text(content = route_id, font = "tom-thumb"),
-        width = 16,
-        height = 16,
+        width = BADGE_W,
+        height = height,
         color = "#" + route_colors.get(route_id, FALLBACK_ROUTE_COLOR),
     )
 
-def departure_lines(stop_id, eta_min):
-    """The two 8px text lines that sit beside a route badge."""
-    stop_display = stops.get(stop_id, stop_id)
+def dome_bar(route_id):
+    """Full-height bar: dome above, route number below."""
+    color = route_colors.get(route_id, FALLBACK_ROUTE_COLOR) if route_id else CAPMETRO_BLUE
+    layers = [render.Box(width = BADGE_W, height = 32, color = "#" + color)]
+
+    # With a route number below, the dome sits high to leave room for it.
+    # With no number, it centres in the full 32px bar.
+    dome_top = 3 if route_id else (32 - 12) // 2
+    layers.append(render.Padding(
+        pad = ((BADGE_W - 7) // 2, dome_top, 0, 0),
+        child = render.Image(src = DOME, width = 7, height = 12),
+    ))
+    if route_id:
+        layers.append(render.Padding(
+            pad = ((BADGE_W - len(route_id) * 4) // 2, 23, 0, 0),
+            child = render.Text(content = route_id, font = "tom-thumb"),
+        ))
+    return render.Stack(children = layers)
+
+def tall_lines(stop_id, eta_min):
     return [
-        render.Row(
-            cross_align = "center",
-            children = [
-                render.Box(width = 1, height = 8),
-                render.Text(content = dep_eta_text(eta_min), font = "tom-thumb"),
-            ],
-        ),
-        render.Row(
-            cross_align = "center",
-            children = [
-                render.Box(width = 1, height = 8),
-                render.Marquee(
-                    width = TEXT_WIDTH - 1,
-                    child = render.Text(content = stop_display, font = "tom-thumb"),
-                ),
-            ],
-        ),
+        render.Row(cross_align = "center", children = [
+            render.Box(width = 1, height = 8),
+            render.Text(content = dep_eta_text(eta_min), font = "tom-thumb"),
+        ]),
+        render.Row(cross_align = "center", children = [
+            render.Box(width = 1, height = 8),
+            render.Marquee(
+                width = 64 - BADGE_W - 1,
+                child = render.Text(content = stop_label(stop_id), font = "tom-thumb"),
+            ),
+        ]),
     ]
+
+def compact_row(route_id, stop_id, eta_min):
+    return render.Row(cross_align = "center", children = [
+        chip(route_id, 8),
+        render.Box(width = 1, height = 8),
+        render.Marquee(
+            width = 64 - BADGE_W - 1 - SPACE_W - ETA_W,
+            child = render.Text(content = stop_label(stop_id), font = "tom-thumb"),
+        ),
+        render.Box(width = SPACE_W, height = 8),
+        render.Box(width = ETA_W, height = 8, child = render.Row(
+            main_align = "end",
+            children = [render.Text(content = eta_short(eta_min), font = "tom-thumb")],
+        )),
+    ])
 
 def no_service_display(message):
     return render.Root(
         max_age = 60,
-        child = render.Row(
-            cross_align = "center",
-            children = [
-                render.Image(src = CAPMETRO_ICON),
-                render.Box(width = 1, height = 16),
-                # 64px display less the 16px icon and 1px gap; messages longer
-                # than ~11 characters are clipped without the marquee.
-                render.Marquee(
-                    width = 47,
-                    child = render.Text(content = message, font = "tom-thumb"),
-                ),
-            ],
-        ),
+        child = render.Row(children = [
+            dome_bar(""),
+            render.Box(width = 64 - BADGE_W, height = 32, child = render.WrappedText(
+                content = message,
+                font = "tom-thumb",
+                width = 64 - BADGE_W - 2,
+                align = "left",
+            )),
+        ]),
     )
 
 def main(config):
-    stop_1 = config.str("stop_1", DEFAULT_STOP)
-    stop_2 = config.str("stop_2", "")
-    stop_3 = config.str("stop_3", "")
-    stop_ids = [s for s in [stop_1, stop_2, stop_3] if s]
+    stop_ids = []
+    for k in ["stop_1", "stop_2", "stop_3", "stop_4"]:
+        s = config.str(k, DEFAULT_STOP if k == "stop_1" else "")
+        if s:
+            stop_ids.append(s)
+    if not stop_ids:
+        return no_service_display("No stops set")
 
-    cache_key = "capmetro_deps_" + "_".join(stop_ids)
+    max_deps = int(config.str("max_departures", "2"))
+
+    cache_key = "capmetro_deps_" + "_".join(stop_ids) + "_" + str(max_deps)
     cached = cache.get(cache_key)
     now_unix = time.now().unix
 
@@ -2561,36 +2607,47 @@ def main(config):
         entities = rep.json().get("entity")
         if entities == None:
             return no_service_display("Feed unavailable")
-        deps = find_departures(stop_ids, entities, now_unix)
+        deps = find_departures(stop_ids, entities, now_unix, max_deps)
         cache.set(cache_key, encode_deps(deps), ttl_seconds = 60)
 
-    # Departures are cached as absolute arrival times, so the ETA is recomputed
-    # on every render rather than going stale for the life of the cache entry.
     deps = [d for d in deps if d[0] >= now_unix]
     if not deps:
         return no_service_display("No departures")
 
-    badges = []
-    lines = []
-    for d in deps:
-        badges.append(route_badge(d[1]))
-        lines.extend(departure_lines(d[2], int((d[0] - now_unix) / 60)))
+    eta = lambda d: int((d[0] - now_unix) / 60)
+    n = len(deps)
 
-    # Pad a single departure so the badge column and the text column stay the
-    # same height and the row does not stretch to fill the display.
-    if len(deps) == 1:
-        badges.append(render.Box(width = BADGE_WIDTH, height = 16))
-        lines.append(render.Box(width = TEXT_WIDTH, height = 16))
+    if n == 1:
+        body = render.Row(children = [
+            dome_bar(deps[0][1]),
+            render.Box(
+                width = 64 - BADGE_W,
+                height = 32,
+                child = render.Column(children = tall_lines(deps[0][2], eta(deps[0]))),
+            ),
+        ])
+    elif n == 2 and deps[0][1] == deps[1][1]:
+        lines = tall_lines(deps[0][2], eta(deps[0])) + tall_lines(deps[1][2], eta(deps[1]))
+        body = render.Row(children = [dome_bar(deps[0][1]), render.Column(children = lines)])
+    elif n == 2:
+        lines = tall_lines(deps[0][2], eta(deps[0])) + tall_lines(deps[1][2], eta(deps[1]))
+        body = render.Row(children = [
+            render.Column(children = [chip(deps[0][1], 16), chip(deps[1][1], 16)]),
+            render.Column(children = lines),
+        ])
+    elif n == 3:
+        body = render.Column(children = [
+            render.Row(children = [
+                chip(deps[0][1], 16),
+                render.Column(children = tall_lines(deps[0][2], eta(deps[0]))),
+            ]),
+            compact_row(deps[1][1], deps[1][2], eta(deps[1])),
+            compact_row(deps[2][1], deps[2][2], eta(deps[2])),
+        ])
+    else:
+        body = render.Column(children = [compact_row(d[1], d[2], eta(d)) for d in deps])
 
-    return render.Root(
-        max_age = 60,
-        child = render.Row(
-            children = [
-                render.Column(children = badges),
-                render.Column(children = lines),
-            ],
-        ),
-    )
+    return render.Root(max_age = 60, child = body)
 
 def get_schema():
     return schema.Schema(
@@ -2616,6 +2673,26 @@ def get_schema():
                 desc = "Third stop ID to monitor",
                 icon = "bus",
                 default = "",
+            ),
+            schema.Text(
+                id = "stop_4",
+                name = "Stop 4 (optional)",
+                desc = "Fourth stop ID to monitor",
+                icon = "bus",
+                default = "",
+            ),
+            schema.Dropdown(
+                id = "max_departures",
+                name = "Departures shown",
+                desc = "How many upcoming departures to display. Stops are a net; this is how many of the soonest results fit on screen.",
+                icon = "listOl",
+                default = "2",
+                options = [
+                    schema.Option(display = "1", value = "1"),
+                    schema.Option(display = "2", value = "2"),
+                    schema.Option(display = "3", value = "3"),
+                    schema.Option(display = "4", value = "4"),
+                ],
             ),
         ],
     )
