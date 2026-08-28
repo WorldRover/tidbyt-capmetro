@@ -4,7 +4,7 @@
 
 Displays real-time Capital Metro (Austin, TX) departure predictions on a [Tidbyt](https://tidbyt.com/) device.
 
-![CapMetro app preview](CapMetro.webp)
+![CapMetro app preview](capmetro.webp)
 
 Shows the next 2 bus or rail arrivals across up to 3 configured stops — pulled live from the CapMetro GTFS-RT trip updates feed. Each row shows a color-coded route badge, arrival ETA ("Due" / "In N min" / ">1 hr"), and a scrolling stop name.
 
@@ -20,13 +20,13 @@ Requires the [pixlet](https://github.com/tidbyt/pixlet) CLI.
 
 ```bash
 # Preview locally
-pixlet serve CapMetro.star
+pixlet serve capmetro.star
 
 # Render to image
-pixlet render CapMetro.star
+pixlet render capmetro.star
 
 # Push to device
-pixlet push --api-token <token> <device-id> CapMetro.webp
+pixlet push --api-token <token> <device-id> capmetro.webp
 ```
 
 ## License

@@ -1,0 +1,7 @@
+id: cap-metro
+name: CapMetro
+summary: Austin Transit Arrivals
+desc: Shows the next two CapMetro bus or rail arrivals across up to three stops you choose, with a color-coded route badge and live ETA.
+author: Dan Ziegler
+fileName: capmetro.star
+packageName: capmetro

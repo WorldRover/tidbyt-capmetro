@@ -6,7 +6,10 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## What This Is
 
-A [Tidbyt](https://tidbyt.com/) app written in [Starlark](https://github.com/google/starlark-go/blob/master/doc/spec.md) that displays real-time CapMetro (Austin, TX) transit data on a Tidbyt LED display. The single app file is `CapMetro.star`.
+A [Tidbyt](https://tidbyt.com/) app written in [Starlark](https://github.com/google/starlark-go/blob/master/doc/spec.md) that displays real-time CapMetro (Austin, TX) transit data on a Tidbyt LED display. The single app file is `capmetro.star`. `manifest.yaml` carries the metadata
+required to publish to the [Tidbyt community app repo](https://github.com/tidbyt/community);
+that repo requires the app filename to be lowercase, which is why it is `capmetro.star`
+and not `CapMetro.star`.
 
 ## Development Commands
 
@@ -14,18 +17,18 @@ Requires the [`pixlet`](https://github.com/tidbyt/pixlet) CLI tool.
 
 ```bash
 # Render the app to a WebP image
-pixlet render CapMetro.star
+pixlet render capmetro.star
 
 # Serve locally with live reload at http://localhost:8080
-pixlet serve CapMetro.star
+pixlet serve capmetro.star
 
 # Push a rendered WebP to a physical Tidbyt device
-pixlet push --api-token <token> <device-id> CapMetro.webp
+pixlet push --api-token <token> <device-id> capmetro.webp
 ```
 
 ## Architecture
 
-`CapMetro.star` is the entire app — one Starlark file with no imports beyond the Tidbyt standard library (`render`, `http`, `cache`, `encoding/base64`, `schema`, `time`).
+`capmetro.star` is the entire app — one Starlark file with no imports beyond the Tidbyt standard library (`render`, `http`, `cache`, `encoding/base64`, `schema`, `time`).
 
 **Data flow in `main(config)`:**
 
@@ -37,7 +40,6 @@ pixlet push --api-token <token> <device-id> CapMetro.webp
 
 **Lookup dictionaries** (defined at the top of the file, before `main()`):
 
-- `route_names` — route ID → display name (currently unused; the badge renders the raw route ID, which is at most 3 characters and fits the 16px badge)
 - `route_colors` — route ID → hex color string (blue `004A97` for local, gray `555555` for MetroRapid, red `E2231A` for express/rail)
 - `stops` — stop ID → intersection/station name
 

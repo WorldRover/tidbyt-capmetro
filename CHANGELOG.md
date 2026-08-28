@@ -17,8 +17,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - A feed response that returned HTTP 200 without an `entity` key crashed instead of showing the no-service display.
 - "Feed unavailable" and "No departures" were clipped by the 47px of space left beside the icon. The message is now a marquee.
 
+### Added
+
+- `manifest.yaml` — metadata required to publish to the Tidbyt community app repo.
+
+### Removed
+
+- `route_names` lookup dict — 79 entries that were never referenced; the route badge renders the raw route ID. Tracked for reinstatement in the scrolling row (see issue).
+
 ### Changed
 
+- Renamed `CapMetro.star`/`CapMetro.webp` to `capmetro.star`/`capmetro.webp`. The community app repo requires lowercase filenames, and the mixed case meant `pixlet render` wrote a second file on case-sensitive filesystems.
+- `.claude/settings.json` (WorldRover branch-name pre-push hook) and `.claude/.wr-canon` are no longer tracked — personal tooling that would block outside contributors.
 - CI now actually renders the app. The job named `render` only ran `pixlet format`, which never executes the applet and so caught none of the above.
 - Corrected `SECURITY.md`, which claimed the app takes no user input and cached for 1 second.
 

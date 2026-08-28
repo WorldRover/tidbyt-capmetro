@@ -10,7 +10,7 @@ Expect an acknowledgement within 48 hours and a resolution or mitigation timelin
 
 This project is a Tidbyt display app. The attack surface is limited to:
 
-- The CapMetro GTFS API response (`data.texas.gov`) — malformed or malicious payloads processed by `CapMetro.star`
+- The CapMetro GTFS API response (`data.texas.gov`) — malformed or malicious payloads processed by `capmetro.star`
 - The Tidbyt API token and device ID stored outside this repository — if leaked, an attacker could push arbitrary images to the display
 
 Out of scope: denial-of-service against third-party APIs, physical access to the Tidbyt device.

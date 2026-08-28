@@ -1,8 +1,13 @@
+# Personal tooling: local settings, the WorldRover branch-name pre-push hook,
+# and the canon version marker. These are not project conventions and would
+# block outside contributors, so they stay out of the shared repo.
 .claude/settings.local.json
+.claude/settings.json
+.claude/.wr-canon
 
 # Local credentials — Tidbyt API token and device ID. Never commit.
 creds.txt
 
 # Rendered output, except the README preview image which is checked in.
 *.webp
-!CapMetro.webp
+!capmetro.webp

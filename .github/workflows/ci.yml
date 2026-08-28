@@ -29,20 +29,20 @@ jobs:
 
       - name: Check formatting
         run: |
-          pixlet format CapMetro.star
-          git diff --exit-code CapMetro.star
+          pixlet format capmetro.star
+          git diff --exit-code capmetro.star
 
       # `pixlet format` never executes the applet, so it cannot catch a load
       # error (e.g. a function shadowing a loaded module) or a runtime crash.
       # These renders exercise both the departures path and the empty path.
       - name: Render (default stop)
-        run: pixlet render CapMetro.star -o /tmp/default.webp
+        run: pixlet render capmetro.star -o /tmp/default.webp
 
       - name: Render (multiple stops)
-        run: pixlet render CapMetro.star stop_1=603 stop_2=5865 stop_3=1042 -o /tmp/multi.webp
+        run: pixlet render capmetro.star stop_1=603 stop_2=5865 stop_3=1042 -o /tmp/multi.webp
 
       - name: Render (no departures)
-        run: pixlet render CapMetro.star stop_1=999999 -o /tmp/empty.webp
+        run: pixlet render capmetro.star stop_1=999999 -o /tmp/empty.webp
 
       - name: Verify renders produced output
         run: |
