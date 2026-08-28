@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.3.0] - 2026-08-28
+
 ### Fixed
 
 - App failed to load at all: `def schema()` shadowed the `schema` module loaded at the top of the file. Renamed to `get_schema()`, which is also the name pixlet expects.
@@ -16,14 +18,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Buses that had already departed within the last 60 seconds displayed as "Due", because `int()` truncates `-0.5` to `0`. Departures are now filtered on absolute arrival time before the ETA is computed.
 - A feed response that returned HTTP 200 without an `entity` key crashed instead of showing the no-service display.
 - "Feed unavailable" and "No departures" were clipped by the 47px of space left beside the icon. The message is now a marquee.
+- Routes `320`, `454`, `800`, and `837` were missing from `route_colors` and rendered a black badge instead of their brand color. `800` and `837` are active MetroRapid routes. ([#21](https://github.com/WorldRover/tidbyt-capmetro/pull/21))
 
 ### Added
 
 - `manifest.yaml` — metadata required to publish to the Tidbyt community app repo.
+- README disclaimer stating the app is unaffiliated with CapMetro and that arrival times are predictions, not guarantees.
 
 ### Removed
 
-- `route_names` lookup dict — 79 entries that were never referenced; the route badge renders the raw route ID. Tracked for reinstatement in the scrolling row (see issue).
+- `route_names` lookup dict — 79 entries that were never referenced; the route badge renders the raw route ID. Tracked for reinstatement in the scrolling row ([#19](https://github.com/WorldRover/tidbyt-capmetro/issues/19)).
 
 ### Changed
 
