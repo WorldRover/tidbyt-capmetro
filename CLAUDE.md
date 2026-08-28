@@ -36,17 +36,19 @@ pixlet push --api-token <token> <device-id> capmetro.webp
 2. Check `cache` for previously fetched departures using a per-stop-set key (`capmetro_deps_<stop_ids>`, TTL: 60s).
 3. On cache miss, fetch GTFS trip updates JSON from `CAPMETRO_TRIP_UPDATES_URL`, call `find_departures()` to collect the 2 soonest arrivals across all configured stops.
 4. If the feed is unreachable or no departures are found, return a graceful no-service display instead of crashing.
-5. Render one `departure_row()` per result and return a `render.Root` with a two-row column layout.
+5. Build a `route_badge()` per result and a pair of `departure_lines()` per result, and return a `render.Root` with the badge column beside the text column.
 
 **Lookup dictionaries** (defined at the top of the file, before `main()`):
 
 - `route_colors` — route ID → hex color string (blue `004A97` for local, gray `555555` for MetroRapid, red `E2231A` for express/rail)
 - `stops` — stop ID → intersection/station name
 
-**Display layout** (64×32 pixels, two 16-px departure rows):
+**Display layout** (64×32 pixels) — two side-by-side columns, not stacked rows:
 
-- Departure row top (8px): colored route badge + ETA text ("Due" / "In N min" / ">1 hr")
-- Departure row bottom (8px): scrolling stop name marquee (indented to align with ETA text)
+- **Badge column** (`BADGE_WIDTH` = 16px): one 16x16 color chip per departure, spanning both of that departure's text lines, with the route ID centered in it.
+- **Text column** (`TEXT_WIDTH` = 48px): two 8px lines per departure — ETA text ("Due" / "In N min" / ">1 hr") on top, scrolling stop name marquee below.
+
+A single departure pads both columns with a 16px box so the layout does not stretch.
 
 **No-service display** (shown when feed is unreachable or no departures found):
 
