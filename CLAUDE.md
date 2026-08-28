@@ -20,12 +20,12 @@ pixlet render CapMetro.star
 pixlet serve CapMetro.star
 
 # Push a rendered WebP to a physical Tidbyt device
-pixlet push --api-token <token> <device-id> capmetro.webp
+pixlet push --api-token <token> <device-id> CapMetro.webp
 ```
 
 ## Architecture
 
-`CapMetro.star` is the entire app — one Starlark file with no imports beyond the Tidbyt standard library (`render`, `http`, `cache`, `encoding/base64`, `schema`).
+`CapMetro.star` is the entire app — one Starlark file with no imports beyond the Tidbyt standard library (`render`, `http`, `cache`, `encoding/base64`, `schema`, `time`).
 
 **Data flow in `main(config)`:**
 
@@ -37,7 +37,7 @@ pixlet push --api-token <token> <device-id> capmetro.webp
 
 **Lookup dictionaries** (defined at the top of the file, before `main()`):
 
-- `route_names` — route ID → display name
+- `route_names` — route ID → display name (currently unused; the badge renders the raw route ID, which is at most 3 characters and fits the 16px badge)
 - `route_colors` — route ID → hex color string (blue `004A97` for local, gray `555555` for MetroRapid, red `E2231A` for express/rail)
 - `stops` — stop ID → intersection/station name
 
@@ -70,7 +70,7 @@ Required labels: `ui`, `data`, `infra`, `P1`, `P2`, `P3`, `type: bug`, `type: fe
 
 - `CAPMETRO_TRIP_UPDATES_URL` — Texas.gov GTFS trip updates feed with arrival predictions (`https://data.texas.gov/download/mqtr-wwpy/text%2Fplain`)
 - `DEFAULT_STOP` — stop shown when no config is provided (`603`, 31st Street Station NB)
-- Tidbyt device ID and API token are stored outside the repo (see `creds.txt`, which is gitignored)
+- Tidbyt device ID and API token live in `creds.txt`, which is gitignored and must never be committed
 
 ## Key references
 
@@ -78,4 +78,4 @@ Required labels: `ui`, `data`, `infra`, `P1`, `P2`, `P3`, `type: bug`, `type: fe
 - Widget reference: [widgets.md](https://github.com/tidbyt/pixlet/blob/main/docs/widgets.md)
 - Font reference: [fonts.md](https://github.com/tidbyt/pixlet/blob/main/docs/fonts.md)
 - GTFS trip updates API: [data.texas.gov](https://data.texas.gov/download/mqtr-wwpy/text%2Fplain)
-- Sample responses are in `resources/vehiclepositions.json` and `resources/vehiclepositions-2.json`
+- Sample responses in `resources/vehiclepositions.json` and `resources/vehiclepositions-2.json` are from the **vehicle positions** feed, which this app no longer uses. Note that the trip updates feed encodes `arrival.time` as a **string**, not a number.

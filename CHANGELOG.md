@@ -7,6 +7,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- App failed to load at all: `def schema()` shadowed the `schema` module loaded at the top of the file. Renamed to `get_schema()`, which is also the name pixlet expects.
+- `find_departures()` crashed with `unknown binary op: string - int` — the trip updates feed encodes `arrival.time` as a JSON string, not a number. It is now parsed with `int()`.
+- `find_departures()` called `deps.sort()`, which does not exist in Starlark. Replaced with `sorted()`.
+- ETAs went stale for the life of a cache entry: the relative minute count was computed once at fetch time and cached for 60s. Absolute arrival times are now cached and the ETA is recomputed on every render.
+- Buses that had already departed within the last 60 seconds displayed as "Due", because `int()` truncates `-0.5` to `0`. Departures are now filtered on absolute arrival time before the ETA is computed.
+- A feed response that returned HTTP 200 without an `entity` key crashed instead of showing the no-service display.
+- "Feed unavailable" and "No departures" were clipped by the 47px of space left beside the icon. The message is now a marquee.
+
+### Changed
+
+- CI now actually renders the app. The job named `render` only ran `pixlet format`, which never executes the applet and so caught none of the above.
+- Corrected `SECURITY.md`, which claimed the app takes no user input and cached for 1 second.
+
 ## [0.2.0] - 2026-05-01
 
 ### Changed

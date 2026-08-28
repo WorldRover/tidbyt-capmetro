@@ -18,5 +18,5 @@ Out of scope: denial-of-service against third-party APIs, physical access to the
 ## Known security considerations
 
 - **API token**: The Tidbyt API token is a bearer credential. It should be treated like a password and never committed to this repository.
-- **No user input**: The app accepts no user-supplied input at runtime; all data comes from the CapMetro public feed.
-- **Cache TTL**: Vehicle position data is cached for 1 second. There is no authentication on the upstream feed.
+- **User input**: The app accepts up to three stop IDs from the Tidbyt app config. These are used to filter the feed and to build a cache key; they are never interpolated into the upstream request URL.
+- **Cache TTL**: Trip update predictions are cached for 60 seconds, keyed by the configured stop set. There is no authentication on the upstream feed.

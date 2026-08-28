@@ -12,7 +12,7 @@ Shows the next 2 bus or rail arrivals across up to 3 configured stops — pulled
 
 In the Tidbyt app, set **Stop 1** (required), **Stop 2**, and **Stop 3** (optional) to the numeric CapMetro stop IDs you want to monitor. For example, stop `603` is 31st Street Station northbound.
 
-Find your stop ID on [CapMetro's trip planner](https://capmetro.org) or in the [GTFS static feed](https://data.texas.gov/dataset/CapMetro-GTFS/eiei-9rpf).
+Find your stop ID on [CapMetro's trip planner](https://www.capmetro.org/planner) — it appears in the stop URL and on the printed sign at the stop — or in the `stops.txt` file of the [GTFS static feed](https://data.texas.gov/dataset/CapMetro-GTFS/eiei-9rpf).
 
 ## Usage
 
@@ -26,7 +26,7 @@ pixlet serve CapMetro.star
 pixlet render CapMetro.star
 
 # Push to device
-pixlet push --api-token <token> <device-id> capmetro.webp
+pixlet push --api-token <token> <device-id> CapMetro.webp
 ```
 
 ## License

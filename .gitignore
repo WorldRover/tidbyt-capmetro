@@ -1,2 +1,8 @@
 .claude/settings.local.json
+
+# Local credentials — Tidbyt API token and device ID. Never commit.
+creds.txt
+
+# Rendered output, except the README preview image which is checked in.
 *.webp
+!CapMetro.webp

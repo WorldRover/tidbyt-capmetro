@@ -2584,12 +2584,13 @@ def find_departures(stop_ids, entities, now_unix):
             arrival = stu.get("arrival", {}).get("time") or stu.get("departure", {}).get("time")
             if not arrival:
                 continue
-            eta_min = int((arrival - now_unix) / 60)
-            if eta_min < 0:
+
+            # The feed encodes epoch seconds as a JSON string, not a number.
+            arrival_unix = int(arrival)
+            if arrival_unix < now_unix:
                 continue
-            deps.append((eta_min, route_id, sid))
-    deps.sort(key = lambda d: d[0])
-    return deps[:2]
+            deps.append((arrival_unix, route_id, sid))
+    return sorted(deps, key = lambda d: d[0])[:2]
 
 def encode_deps(deps):
     return "|".join(["%d:%s:%s" % (d[0], d[1], d[2]) for d in deps])
@@ -2649,7 +2650,12 @@ def no_service_display(message):
             children = [
                 render.Image(src = CAPMETRO_ICON),
                 render.Box(width = 1, height = 16),
-                render.Text(content = message, font = "tom-thumb"),
+                # 64px display less the 16px icon and 1px gap; messages longer
+                # than ~11 characters are clipped without the marquee.
+                render.Marquee(
+                    width = 47,
+                    child = render.Text(content = message, font = "tom-thumb"),
+                ),
             ],
         ),
     )
@@ -2662,6 +2668,7 @@ def main(config):
 
     cache_key = "capmetro_deps_" + "_".join(stop_ids)
     cached = cache.get(cache_key)
+    now_unix = time.now().unix
 
     if cached != None:
         deps = decode_deps(cached)
@@ -2669,14 +2676,19 @@ def main(config):
         rep = http.get(CAPMETRO_TRIP_UPDATES_URL)
         if rep.status_code != 200:
             return no_service_display("Feed unavailable")
-        now_unix = time.now().unix
-        deps = find_departures(stop_ids, rep.json()["entity"], now_unix)
+        entities = rep.json().get("entity")
+        if entities == None:
+            return no_service_display("Feed unavailable")
+        deps = find_departures(stop_ids, entities, now_unix)
         cache.set(cache_key, encode_deps(deps), ttl_seconds = 60)
 
+    # Departures are cached as absolute arrival times, so the ETA is recomputed
+    # on every render rather than going stale for the life of the cache entry.
+    deps = [d for d in deps if d[0] >= now_unix]
     if not deps:
         return no_service_display("No departures")
 
-    rows = [departure_row(d[1], d[2], d[0]) for d in deps]
+    rows = [departure_row(d[1], d[2], int((d[0] - now_unix) / 60)) for d in deps]
     if len(rows) == 1:
         rows.append(render.Box(width = 64, height = 16))
 
@@ -2687,7 +2699,7 @@ def main(config):
         ),
     )
 
-def schema():
+def get_schema():
     return schema.Schema(
         version = "1",
         fields = [

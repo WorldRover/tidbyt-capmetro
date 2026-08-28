@@ -31,3 +31,21 @@ jobs:
         run: |
           pixlet format CapMetro.star
           git diff --exit-code CapMetro.star
+
+      # `pixlet format` never executes the applet, so it cannot catch a load
+      # error (e.g. a function shadowing a loaded module) or a runtime crash.
+      # These renders exercise both the departures path and the empty path.
+      - name: Render (default stop)
+        run: pixlet render CapMetro.star -o /tmp/default.webp
+
+      - name: Render (multiple stops)
+        run: pixlet render CapMetro.star stop_1=603 stop_2=5865 stop_3=1042 -o /tmp/multi.webp
+
+      - name: Render (no departures)
+        run: pixlet render CapMetro.star stop_1=999999 -o /tmp/empty.webp
+
+      - name: Verify renders produced output
+        run: |
+          for f in /tmp/default.webp /tmp/multi.webp /tmp/empty.webp; do
+            test -s "$f" || { echo "::error::$f is empty or missing"; exit 1; }
+          done
