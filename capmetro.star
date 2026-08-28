@@ -8,6 +8,11 @@ load("time.star", "time")
 CAPMETRO_TRIP_UPDATES_URL = "https://data.texas.gov/download/mqtr-wwpy/text%2Fplain"
 DEFAULT_STOP = "603"
 
+# Fallback for a route the feed has but route_colors does not. Black matches the
+# unlit background, so an unknown route shows its number with no chip -- a
+# deliberate "we do not know this route" rather than a guessed colour.
+FALLBACK_ROUTE_COLOR = "000000"
+
 # 64px display: a 16px route badge column beside the ETA / stop-name column.
 BADGE_WIDTH = 16
 TEXT_WIDTH = 48
@@ -19,7 +24,6 @@ iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAAXNSR0IArs4c6QAAAERlWElmTU0AKgAA
 # Lookup
 
 route_colors = {
-    "000": "000000",
     "1": "004A97",
     "2": "004A97",
     "3": "004A97",
@@ -94,7 +98,6 @@ route_colors = {
 }
 
 stops = {
-    "0000": "Unknown",
     "243": "Rio Grande/15th",
     "465": "8912 Lamar/Payton Gin",
     "467": "Fairfield Rapid Station (SB)",
@@ -2495,7 +2498,7 @@ def route_badge(route_id):
         child = render.Text(content = route_id, font = "tom-thumb"),
         width = 16,
         height = 16,
-        color = "#" + route_colors.get(route_id, route_colors["000"]),
+        color = "#" + route_colors.get(route_id, FALLBACK_ROUTE_COLOR),
     )
 
 def departure_lines(stop_id, eta_min):
