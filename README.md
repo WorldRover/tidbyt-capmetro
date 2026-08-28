@@ -10,7 +10,7 @@ Shows the next 2 bus or rail arrivals across up to 3 configured stops — pulled
 
 ## Getting started
 
-In the Tidbyt app, set **Stop 1** (required), **Stop 2**, and **Stop 3** (optional) to the numeric CapMetro stop IDs you want to monitor. For example, stop `603` is 31st Street Station northbound.
+In the Tidbyt app, set **Stop 1**, **Stop 2**, and **Stop 3** to the numeric CapMetro stop IDs you want to monitor. Stop 1 defaults to `603`; the others are optional. For example, stop `603` is 31st Street Rapid Station (NB).
 
 Find your stop ID on [CapMetro's trip planner](https://www.capmetro.org/planner) — it appears in the stop URL and on the printed sign at the stop — or in the `stops.txt` file of the [GTFS static feed](https://data.texas.gov/dataset/CapMetro-GTFS/eiei-9rpf).
 
@@ -22,11 +22,12 @@ Requires the [pixlet](https://github.com/tidbyt/pixlet) CLI.
 # Preview locally
 pixlet serve capmetro.star
 
-# Render to image
-pixlet render capmetro.star
+# Render to an image. Note the default output name is capmetro.webp,
+# which is the README preview above - write elsewhere to avoid clobbering it.
+pixlet render capmetro.star -o /tmp/capmetro.webp
 
 # Push to device
-pixlet push --api-token <token> <device-id> capmetro.webp
+pixlet push --api-token <token> <device-id> /tmp/capmetro.webp
 ```
 
 ## Disclaimer
@@ -39,7 +40,7 @@ Authority (CapMetro) or Tidbyt.
 here only to identify the transit system whose public data the app displays.
 "Tidbyt" and "pixlet" are trademarks of their respective owner, used here only
 to identify the hardware the app runs on and the tool used to build it. Neither
-organisation has reviewed, approved, or endorsed this project.
+organization has reviewed, approved, or endorsed this project.
 
 Arrival times come from CapMetro's public GTFS-Realtime feed and are
 **predictions, not guarantees**. The feed may be delayed, incomplete, or
