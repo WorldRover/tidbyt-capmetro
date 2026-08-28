@@ -7,6 +7,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.4.0] - 2026-08-28
+
+### Changed
+
+- Route badges now span both lines of their departure. The display is two side-by-side columns — a 16px badge column and a 48px text column — rather than two stacked departure rows. Each badge is a 16x16 color chip with the route ID vertically centered. ([#25](https://github.com/WorldRover/tidbyt-capmetro/pull/25))
+- README preview regenerated to show the route color coding and the stop-name marquee. The previous image used two MetroRapid stops, whose shared `555555` brand color made every badge gray, and both stop names were long enough that any still frame caught both marquees mid-scroll. ([#24](https://github.com/WorldRover/tidbyt-capmetro/pull/24))
+
+### Removed
+
+- The 17px spacer box that padded the stop-name marquee into alignment with the ETA text. The badge column now provides that offset structurally, so the marquee gets the full text column. ([#25](https://github.com/WorldRover/tidbyt-capmetro/pull/25))
+
 ## [0.3.0] - 2026-08-28
 
 ### Fixed
