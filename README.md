@@ -32,10 +32,14 @@ pixlet push --api-token <token> <device-id> capmetro.webp
 ## Disclaimer
 
 This is an unofficial, independently built app. It is **not affiliated with,
-endorsed by, or supported by** the Capital Metropolitan Transportation Authority
-(CapMetro). "CapMetro" and the CapMetro logo are trademarks of their respective
-owner, used here only to identify the transit system whose public data the app
-displays.
+endorsed by, or supported by** either the Capital Metropolitan Transportation
+Authority (CapMetro) or Tidbyt.
+
+"CapMetro" and the CapMetro logo are trademarks of their respective owner, used
+here only to identify the transit system whose public data the app displays.
+"Tidbyt" and "pixlet" are trademarks of their respective owner, used here only
+to identify the hardware the app runs on and the tool used to build it. Neither
+organisation has reviewed, approved, or endorsed this project.
 
 Arrival times come from CapMetro's public GTFS-Realtime feed and are
 **predictions, not guarantees**. The feed may be delayed, incomplete, or
