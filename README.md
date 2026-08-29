@@ -87,7 +87,6 @@ Releases are [semver](https://semver.org/), tagged `vMAJOR.MINOR.PATCH` on `main
 - GTFS trip updates — the feed this app reads: [raw feed](https://data.texas.gov/download/mqtr-wwpy/text%2Fplain) · [dataset page](https://data.texas.gov/Transportation/CapMetro-Trip-Updates-JSON-File/mqtr-wwpy). Note it encodes `arrival.time` as a **string**, not a number.
 - Other CapMetro feeds, unused by the app today: [vehicle positions](https://data.texas.gov/download/cuc7-ywmd/text%2Fplain) (~122 KB) · [service alerts](https://data.texas.gov/download/9zu9-jwr2/text%2Fplain) (~79 KB, a bare JSON array) · [GTFS static zip](https://data.texas.gov/download/r4v4-vz24/application%2Fzip) (~34 MB, too large for `http.get`)
 - CapMetro route maps: [all bus routes](https://www.capmetro.org/ourservices/busroutes) · [a single route](https://www.capmetro.org/schedmap/?svc=0&f1=214) (change `f1=` to the route ID)
-- Redrawing the dome icon: draw at [pixilart](https://www.pixilart.com/draw), encode with [base64.guru](https://base64.guru/converter/encode/image)
 
 ## Disclaimer
 

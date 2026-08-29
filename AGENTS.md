@@ -48,8 +48,11 @@ installs the set.
   the right-aligned compact ETA, and the gap before it
 - `FALLBACK_ROUTE_COLOR` (`000000`) — badge color for a route `route_colors`
   does not know
-- `DOME` — base64 CapMetro dome icon, drawn in the no-service screens and above
-  the route number in `dome_bar()`
+- `DOME` — the CapMetro dome icon, a base64 PNG inlined in the source. 7×12
+  RGBA, two pixel values only: opaque white and fully transparent. It is drawn
+  over the route's color bar, so it must stay white-on-transparent — a white
+  background would show as a box. Used in the no-service screens and above the
+  route number in `dome_bar()`.
 
 ## Render functions
 
