@@ -74,5 +74,6 @@ two-line text column · `compact_row()` badge + name + right-aligned
 - Cache absolute arrival times, never relative minutes, or ETAs go stale.
 - The service alerts feed contains CapMetro staff names and email addresses.
   Never display or log them.
-- Credentials live in `.env` (`TIDBYT_API_TOKEN`, `TIDBYT_DEVICE_ID`), which is
-  gitignored and must never be committed.
+- The repo holds no credentials. `pixlet login` stores them outside the project;
+  `$TIDBYT_API_TOKEN` is the scripted fallback. Never write a token into a file
+  in this repo, and never pass one on a command line you'd leave in history.

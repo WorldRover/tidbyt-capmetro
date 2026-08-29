@@ -28,19 +28,25 @@ pixlet serve capmetro.star
 # which is the README preview above - write elsewhere to avoid clobbering it.
 pixlet render capmetro.star -o /tmp/capmetro.webp
 
-# Push to device
-pixlet push --api-token <token> <device-id> /tmp/capmetro.webp
+# Push to device (see Credentials below)
+pixlet push <device-id> /tmp/capmetro.webp
 ```
 
 ### Credentials
 
-Copy `.env.example` to `.env` and fill in your Tidbyt API token and device ID — both come from the Tidbyt mobile app under **Settings → Developer**. `.env` is gitignored; never commit it.
+Run `pixlet login` once. It stores your credentials outside the repo — on macOS
+under `~/Library/Application Support/tidbyt/` — and every later `pixlet push`
+picks them up, so no token ever lives in this project.
 
 ```bash
-cp .env.example .env
-set -a && . ./.env && set +a
-pixlet push --api-token "$TIDBYT_API_TOKEN" "$TIDBYT_DEVICE_ID" /tmp/capmetro.webp
+pixlet login
+pixlet devices          # lists your devices and their IDs
+pixlet push <device-id> /tmp/capmetro.webp
 ```
+
+For a scripted or CI push where an interactive login isn't possible, pixlet also
+reads `$TIDBYT_API_TOKEN`, or takes `--api-token`. Prefer the environment
+variable — a token passed as a flag ends up in your shell history.
 
 ## How it works
 
