@@ -12,8 +12,9 @@ needs that a reader of the README does not.
 ## Versioning
 
 Semantic Versioning, tagged `vMAJOR.MINOR.PATCH` directly on `main` after the PR
-merges. The version lives in `manifest.yaml` and must match the topmost released
-heading in `CHANGELOG.md`.
+merges. A pixlet `manifest.yaml` has no version field, so the tag and the
+topmost released heading in `CHANGELOG.md` are the only source of truth — keep
+them in step.
 
 **Cadence — buffer model:** batch small fixes into one minor release rather than
 shipping a patch per commit. Cut a release when `## [Unreleased]` has

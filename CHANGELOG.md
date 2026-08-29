@@ -7,6 +7,27 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.5.0] - 2026-08-28
+
+### Added
+
+- **Departures shown** setting — a dropdown choosing how many arrivals appear at once, 1 to 4 (default 2). ([#33](https://github.com/WorldRover/tidbyt-capmetro/pull/33))
+- **Stop 4** — a fourth optional stop field. ([#33](https://github.com/WorldRover/tidbyt-capmetro/pull/33))
+- `AGENTS.md` — the canonical model-neutral agent guidance file, with `CLAUDE.md` and `GEMINI.md` as symlinks to it. ([#35](https://github.com/WorldRover/tidbyt-capmetro/pull/35))
+
+### Changed
+
+- The display now picks one of five layouts based on how many departures were actually found, rather than always drawing two rows, so the screen is never half-empty. One departure gets a full-height bar in the route's color with the dome above the route number; two on the same route merge into one bar; three and four break into compact rows with the abbreviated ETA (`Due` / `8m` / `>1h`) right-aligned in a fixed column so the ETAs read as a column against ragged stop names. ([#33](https://github.com/WorldRover/tidbyt-capmetro/pull/33))
+- The no-service screens ("No stops set", "No departures", "Feed unavailable") use the same full-height color bar with the dome vertically centered, instead of leaving the left column black. ([#33](https://github.com/WorldRover/tidbyt-capmetro/pull/33))
+- An unknown stop ID renders as `Stop 1145` rather than the bare number. ([#33](https://github.com/WorldRover/tidbyt-capmetro/pull/33))
+- README now carries the project documentation a contributor would look for — how the app works, the layout table, the conventions, and the feed and reference links — instead of keeping it in an agent-tool file. ([#35](https://github.com/WorldRover/tidbyt-capmetro/pull/35))
+- Credentials are documented as `pixlet login`, which stores them outside the repo, with `$TIDBYT_API_TOKEN` as the scripted fallback. ([#34](https://github.com/WorldRover/tidbyt-capmetro/pull/34), [#35](https://github.com/WorldRover/tidbyt-capmetro/pull/35))
+
+### Removed
+
+- `resources/` — three 2022 captures of the vehicle positions feed, which this app does not read, and three unreferenced PNGs. ([#35](https://github.com/WorldRover/tidbyt-capmetro/pull/35))
+- `route_colors["000"]` sentinel, replaced by `FALLBACK_ROUTE_COLOR`. ([#33](https://github.com/WorldRover/tidbyt-capmetro/pull/33))
+
 ## [0.4.0] - 2026-08-28
 
 ### Changed
