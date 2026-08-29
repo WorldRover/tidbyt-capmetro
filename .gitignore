@@ -3,6 +3,11 @@
 .claude/settings.json
 .claude/.wr-canon
 
+# Agent-tool aliases for AGENTS.md, which is the canonical file. Symlinked
+# locally so each tool finds it under the name it looks for.
+CLAUDE.md
+GEMINI.md
+
 # Local credentials — Tidbyt API token and device ID. Never commit.
 # .env.example is the checked-in template.
 .env
